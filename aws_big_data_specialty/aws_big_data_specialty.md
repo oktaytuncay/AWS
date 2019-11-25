@@ -266,7 +266,8 @@ Firehose için minimum buffer time 1 dakikadır.
 • Scaling (shard splitting/merging) işi manage edilmelidir.
 • Data 1 ile 7 gün arasında muhafaza edilir.
 • Replay yeteneği ve multi consumer seçeneği vardır.
-• AWS Lambda kullanılarak, Real-Time data insert edilebilir. *Örnek: ElasticSearch*
+*  AWS Lambda kullanılarak, Real-Time data insert edilebilir. 
+    * Örnek: ElasticSearch
 
 **Kinesis Firehose**
 • Fully managed'dır.
@@ -277,3 +278,421 @@ Firehose için minimum buffer time 1 dakikadır.
 
 <a name="#aws-sqs"></a>
 ## AWS SQS
+
+En eski AWS servislerinden biridir ve AWS tarafından fully managedır.
+
+•	Saniyede 1 mesajdan, 10.000'e kadar çıkabilir.
+•	Default olarak retention 4 gündür ve bu süre 14 güne kadar çıkabilir. 
+•	Que'da olabilecek mesaj sayısı için sınır bulunmaktadır.
+•	Publish ve receive için 10ms altında bir lateny sağlar.
+•	Consumer sayısına göre  yatay olarak ölçeklenebilir.
+•	Mesajlar en az bir kere teslim edilir ve duplicate mesaj da olabilir.
+•	Best-effort ordering de, bozuk mesajlar olabilir.
+•	Gönderilen mesajlarda mesaj başına 256kb sınır bulunmaktadır.
+
+![image12](images/image12.png)
+
+Consumerlar aynı anda 10 mesaja kadar alabilirler.
+Bu mesajlar visibility timeout parametresi içerisinde process edilir. Mesajlar process edildikten sonra, message_id kullanılarak, bu mesajlar que'dan silinir.
+
+![image13](images/image13.png)
+
+SQS olduğu zaman, consumerlar poll messages işini yapacak, consumerlar bu mesajları process edeceklerdir ve bir daha process edilmemesi için ardından SQS que'dan sileceklerdir. 
+
+Bu şekilde mesajlar farklı consumer uygulamaları tarafından process edilmemiş olacaklardır. Bu özellik SQS ve Kinesis arasındaki en büyük farklardan birisidir.
+
+#### AWS SQS Fifo Queue
+
+SQS ilk olarak standart queue ile çıktı ve şu anda Fifo Queue olarak da hizmet sağlamaktadır. Açılım First In First Out'dur ve bütün regionlarda bulunmamaktadır.
+Queue adımının sonu .fifo ile bitmelidir. 
+
+Daha düşük throughput sunmaktadır ve batching ile saniye 3000 ve batch olmayan işlemler için saniyede 300 throughput sağlamaktadır. 
+Mesajlar sırayla işlenir ve sadece 1 kere gönderilir. Duplication ID kullanılarak 5 dakikalık aralıklarla veri tekilleştirme sağlanılabilir.
+
+
+![image14](images/image14.png)
+
+Mesajlar 1,2,3,4,5 sırası ile gönderilmiş ise, consumerlar tarafından yine aynı sırada okunacaklardır.
+
+SQS ile 256 kb üzerinde mesaj gönderilmesi tavsiye edilmez ama ihtiyaç ısrarla bu yönde ise, bir java library'si olan SQS extended Client ile sağlanır.
+
+![image15](images/image15.png)
+
+Bunun için Amazon S3 kullanılır ve diyelimki 5 mb veya 10 mb mesaj göndermek isteyelim. Yukarıdaki gibi büyük mesajlar producer tarafından direk S3'e gönderilir ve bu mesajlar yine direk S3'den direk alınır.
+
+Asynchronously olarak işlenen ödeme servisleri gibi decouple uygulamalar, voting uygulamaları gibi database'e yazılan buffer yazmaları, e-mail gönderimi gibi büyük mesaj load işlemleri gibi use case'ler için uygundur.
+
+SQS CloudWatch üzerinden Auto Scale olarak entegre edilebilir.
+
+#### SQS Limitleri
+
+•	Consumerlar tarafından maksimum 120.000 in-flight mesaj process edilebilir.
+•	Batch requestler en fazla 10 mesaj ve 256kb olabilir.
+•	Mesaj formatı; XML, JSON veya formatı belirsiz text olabilir.
+•	Standart que’da sınırsız TPS vardır.
+•	FIFO queue saniyede en fazla 3000 mesaj destekler.
+•	Max mesaj size'ı extended client kullanılmadığı taktirde 256 kb'dır.
+•	Data retention 1 dakika ve 14 gün arasındadır.
+•	Yapılan API request ve network kullanımı üzerinden ücretlendirilir.
+
+#### SQS Security
+
+* Https ile in-flight encryption sağlanır.
+*	KMS ile server side encryption yapılabilir.
+    *	CMK (Customer Master Key) kullanılabilir.
+    *	SSE ile sadece mesajın body'si encrypt edilir. Message_ID, timestamp, attributes kısımları gibi metadata bölümü encrypt edilmez.
+*	IAM policy SQS kullanımına izin vermelidir.
+*	SQS queue access policy, IP üzerinden kontrol ve requestlerin geldiği süre boyunca kontrol yapılabilir.
+
+#### Kinesis Data Stream vs SQS
+
+Ne zaman SQS ve ne zaman Kinesis Data Stream kullanılmalıdır.
+
+Kinesis Data Stream
+•	Data birden fazla kez consume edilebilir.
+•	Data retention period sonrasında silinir.
+•	Kayıt sırası replay sırasında bile korunur.
+•	Birden fazla uygulamanın aynı stream'i okuması için dizayn edilmiştir. (Pub/Sub)
+•	Datayı process etmek ve sorgulamak için Spark veya MapReduce kullanılabilir.
+•	DynamoDB ile etkileşimli, Kinesis Consuler Library (KCL) ile beraber kullanılabilecek checkpointing özelliği vardır. Bu sayede consumption ilerleyişi izlenebilir.
+•	Shard kapasitesi, limite dayanmadan önce sağlanmalıdır.
+•	Max 1 mb mesaj size'ı vardır.
+	
+SQS
+•	Decouple yani ayrı uygulamalar için uygundur.
+•	Que başına bir tane uygulama olabilir.
+•	Consumption sonrası kayıtlar silinir.
+•	Mesajlar standart için sıradan bağımsız işlenir ve FIFO'da sıra ile işlenir.
+•	"Delay" message özelliği vardır.
+•	Dinamik olarak scale olabilir.
+•	Max 256 kb mesaj size'ı vardır.
+
+
+Kinesis Data Stream | SQS
+------------ | -------------
+Data birden fazla kez consume edilebilir. | Data bir kez consume edilebilir.
+Data retention period sonrasında silinir. | Data consumption sonrası silinir.
+Kayıt sırası replay sırasında bile korunur. | Mesajlar standart için sıradan bağımsız işlenir ve FIFO'da sıra ile işlenir.
+**Birden fazla uygulamanın aynı stream'i okuması için dizayn edilmiştir. (Pub/Sub)** | Decouple yani ayrı uygulamalar için uygundur ve que başına bir tane uygulama olabilir.
+**Datayı process etmek ve sorgulamak için Spark veya MapReduce kullanılabilir.** | 
+DynamoDB ile etkileşimli, Kinesis Consuler Library (KCL) ile beraber kullanılabilecek checkpointing özelliği vardır. Bu sayede consumption ilerleyişi izlenebilir.  | "Delay" message özelliği vardır.
+Shard kapasitesi, limite dayanmadan önce sağlanmalıdır.  | Dinamik olarak scale olabilir.
+**Max 1 mb mesaj size'ı vardır.**  | Max 256 kb mesaj size'ı vardır.
+
+Kinesis Data Stream, Data Firehose, SQS standart ve Fifo arasındaki fark aiağıdaki tabloda daha açık görünmektedir.
+
+![image24](images/image24.png)
+
+**Use cases:**
+
+Kinesis Data Stream:
+*	Daha fazla BigData için uygundur.
+*	Event data collection ve processing
+*	Real-Time metric toplama ve raporlama
+*	Mobil veri yakalamak
+*	Real-Time data analizi
+*	Oyun veri akışı
+*	Karmaşık stream processing
+*	"Internet of Things" verileri
+
+SQS:
+* Order processing
+* Image processing
+* Mesaj yüküne göre auto scaling gerektiren yapılar.
+* Database insert veya visual processing için buffer ve batch mesalar yapıları
+* Offloading requestleri
+
+### IoT (Internet of Things)
+
+![image16](images/image16.png)
+
+IoT, internet of things yani nesnelerin interneti anlamına gelir. Burada yer alan nesne her şey olabilir. Bisiklet, araba, lamba yani kısasacı istenilen her şeydir.
+
+![image17](images/image17.png)
+
+Burada yer alan nesne konfigüre edilir ve data bu nesnelerden alınır.
+
+Nesne, AWS'de bulunan IoT Cloud'a, thing registry ile register olacak ve thing registry bir device ID verecek.
+
+IoT nesnesinin Cloud ortamı ile iletişim kurması için device gateway kullanmaktadır. Device gateway AWS tarafından manage edilen bir servistir. 
+
+Hava sıcaklığının 30 derece olduğu zaman rapor eden bir IoT yapısı olmuş olsun. 
+Böyle bir yapıda IoT Message Broker'a SNS topic gibi bir mesaj gönderecektir ve bu mesaj bir çok farklı yere gönderilecektir.
+IoT Rules Engine yardımı ile bu mesajları Kinesis, SQS, Lambda gibi hedeflere gönderilecektir. **Sensörlerden veri toplamak için IoT Rules Engine kullanılabilir ve cihazdan alınan veriler DynamoDB'ye aktarılabilir.**
+
+Böyle bir yapıyı IoT Device Shadow adında bir servis ile de entegre edebiliriz. Bu servis kelimenin tam anlamıyla bağlı nesne/cihaz'ın gölgesi gibi çalışacaktır.
+
+Termostat internete bağlı olmasa bile, Device Shadow ile cihazın durumu değiştirilebilir. 
+
+Örneğin, odanın sıcaklığı 25 derece olsun ve biz bunun 20 derece olmasını isteyelim. 
+O an için termostatın internete bağlantısında bize bağlı olmayan bir sorun olsun ve biz mobil uygulamadan gönderdiğimiz Rest-API ile odanın sıcaklığını düşürmek isteyelim. 
+
+Bu durumda bizim gönderdiğimiz API, Device shadow'a gidecek ve device shadow artık odanın sıcaklığının 20 derece olması gerektiğini bilecek. 
+Asıl device'da yaşanan bağlantı sorunu ortadan kalktığı anda da, shadow device asıl device'a talebi iletecektir ve sıcaklığın düşürülmesi için süreç başlayacaktır.
+
+![image18](images/image18.png)
+
+Bir ampul için olabilecek basit mimarinin görseli de yukarıdaki gibi olacaktır.
+
+Aşağıdaki linkte sadece 5 dakika olan bir tutorial izlenerek, bütün işleyişin nasıl olduğunu daha rahat anlaşılabilir.
+
+https://us-west-1.console.aws.amazon.com/iot/home?region=us-west-1#/learnHub
+
+#### IoT Device Gateway
+
+AWS'e bağlanan IoT cihazları için entry point görevi görür. Cihazların AWS'e güvenli ve verimli şekilde iletişim kurmasından sorumludur.
+
+MQTT, WebSocket ve http 1.1 protokollerini destekler. AWS tarafından fully managed olan bu servis 1 milyardan fazla cihazı desteklemek için otomatik scale olmaktadır.
+
+Örnek olarak nesne connected bisikletlerden olsun. Bisiklet, AWS ortamında yer alan Device Gateway'e MQTT mesajları göndererek, veri akışının güvenli şekilde yapılmasını sağlar.
+
+**Rules Engine**
+![image19](images/image19.png)
+
+Kurallar MQTT topiclerinde tanımlanmaktadır.
+**Rules:** Tetiklenecek iş
+**Action:** Yapılmak istenen iş, şeklinde işler.
+
+Use cases:
+* Bir cihazdan alınan verilerin DynamoDB'ye yazılması
+* S3'e dosya kaydedilmesi
+* Kullanıcı gruplarına notification mesajlarının atılması
+* Data extract etmek için Lambda fonksiyonun çağırılması
+* Amazon Kinesis kullanarak, çok sayıda cihazdan gelen mesajların işlenmesi
+* Amazon ElasticSearch'e data gönderilmesi
+* CloudWatch metriklerinin yakalanması ve CloudWatch alarmının oluşturulması
+* MQTT mesajındaki verileri Amazon Machine Learning makinesine göndererek, ML modeline dayalı tahminlerde bulunmak
+
+Rules kısmının, action olabilmesi için de IAM rollerine ihtiyaç duyulmaktadır.
+
+### DMS – Database Migration Service
+
+Source veri tabanı migration sırasında aynı şekilde kullanılmaya devam edilebilir.
+
+Aynı tip veri tabanlarından (Oracle to Oracle) birbirlerine ve farklı tip veri tabanlarından (Microsoft SQL Server to Aurora) birbirlerine migration desteklenir.
+
+CDC (Captures Database Changes) kullanarak, data replikasyonu sağlanır. Replication tasklarının yapılmabilmesi için, EC2 instance'ı oluşturulması gerekmektedir.
+
+#### DMS Sources ve Target
+
+**Sources**
+On-Premise ve EC2 instance veri tabanları olabilir. 
+Liste aşağıdaki gibidir;
+*Oracle, MS SQL Server, MySQL, MariaDB, PostgreSQL, MongoDB, SAP, DB2*
+
+Bunların dışında aşağıdaki Cloud veri tabanları da olabilir.
+*Azure SQL Database, Amazon RDS (all including Aurora), Amazon S3*
+
+**Targets**
+On-Premise ve EC2 instance veri tabanları olabilir. 
+Liste aşağıdaki gibidir;
+*Oracle, MS SQL Server, MySQL, MariaDB, PostgreSQL, SAP*
+
+Bunların dışında aşağıdaki Cloud veri tabanları da olabilir. 
+*Amazon RDS, Amazon Redshift, Amazon DynamoDB, Amazon S3, ElasticSearch Service, Kinesis Data Streams, DocumentDB.*
+
+Çalışma prensibi arka planda çalışan AWS Schema Coversion Tool (SCT) ile gerçekleşir. AWS SCT, AWS DMS endpoint ve task oluşturarak süreci işletir.
+
+Database schema engine'i birinden bir diğerine convert olur. 
+
+Örnek olarak, SQL Server veya Oracle gibi OLTP veri tabanları; MySQL, PostgreSQL, Aurora gibi veri tabanlarına convert edilir. Teradata veya Oracle gibi OLAP yapısına sahip olan veri tabanları Amazon Redshift gibi DWH ortamına migrate edilebilir.
+
+### Direct Connect
+
+![image20](images/image20.png)
+
+On-Premise network ve VPC arasında dedike kurulu private bir bağlantıdır. Birden fazla 1 gb/s veya 10 gb/s bağlantı kurulabilir. Bu şekilde bir bağlantı için VPC'de virtual private network kurulmalıdır. 
+
+**Use Cases:**
+* Büyük data setler ile çalışmak için, bandwidth throughput arttırılması
+* Real-Time veri kullanan uygulamalar için consistent network ihtiyacı
+* On-Premise ve Cloud ortamlarının beraber kullanıldığı, hybrid mimariler için 
+* Private connection ile daha gelişmiş güvenlik ihtiyacı için
+
+IPv4 ve IPv6 desteği vardır.
+
+**High-availability:** Failover için iki ayrı Data Center veya Site-to-Site VPN kullanılabilir.
+
+Yukarıdaki diagramda görüldüğü gibi AWS Direct Connect endpoint ile hem Amazon Glacier veya S3 gibi public kaynaklara hem de private network'de olan EC2 instance'larına güvenli ve hızlı bağlantı kurulabilir.
+
+![image21](images/image21.png)
+
+Eğer direct connect bağlantısı aynı account'da bulunan farklı region'larda bulunan VPC'ler için isteniyorsa, Direct Connect Gateway kullanılmalıdır.
+
+### Snowball
+
+Tb veya Pb düzeyindeki verilerin, AWS içinde veya dışında taşımaya yardımcı olan fiziksek veri taşıma çözümüdür.
+
+* Verilerin ağ üzerinden taşımaya alternatifidir ve daha hesaplı bir yöntemdir.
+* 256 bit KMS encryption şifreleme ile güvenli bir taşıma sağlar.
+* Taşıma takibi SNS veya text mesaj ile yapılır. 
+* Data transfer işi başına ücretlendirilir.
+* Büyük Cloud migration, DC taşınması ve disaster recovery durumlarında tercih edilebilir.
+* **Bir veri taşıma network üzerinden 1 hafta veya daha uzun sürecek ise, snowball kullanmak hem daha hızlı hem de daha güvenli olacaktır.**
+
+#### Snowball Process
+
+![image22](images/image22.png)
+
+* AWS console'dan snowball device talebi girilir.
+* Snowball client server'lara yüklenir.
+* Snowball ve server birbirlerine bağlanır ve snowball client ile veriler server'dan snowball'a aktarılır.
+* Cihaz geri gönderilir ve veriler S3 bucket'a yüklenir.
+* Snowball tamamen temizlenir.
+* Süreç takibi SNS, text mesajları ve AWS console'dan yapılır.
+
+#### Snowball Edge
+
+Cihaza compute yeteneği ekler ve aynı zamanda storage (24 vcpu) ve compute (52v cpu & opsiyonel gpu) optimized'dır. 
+
+* Hareket halinde de işlem yapılabilmesi için custom EC2 AMI desteği vardır.
+* Lambda function desteği vardır.
+* Data taşınırken datanın pre-process edilmesine olanak sağlar.
+* Data migration, image karşılaştırma, IoT işleri ve machine learning için kullanımı uygundur.
+
+#### AWS Snowmobile
+
+![image23](images/image23.png)
+
+Exabytes yani 100 pb veri transferi sağlar.
+
+Her Snowmobile 100 pb kapasiteye sahiptir ve paralel kullanım sağlamaktadır. **Eğer taşınacak veri 10 pb fazla ise, Snowball yerine Snowmobile tercih edilmelidir.**
+
+## Storage
+
+### S3
+
+Dosyaların yani objelerin bucketlara yani dizinlere konumlasını sağlar.
+
+![image25](images/image25.png)
+
+Bucketlar global olarak unique bir isme sahip olmaları gerekmektedir.
+Bucketlar region seviyesinde tanımlanmaktadır ve isim standartları aşağıdaki gibi olmalıdır.
+* Büyük karakter veya alt çizgi olmamalı. 
+* 3 ila 63 karakter uzunluğunda olabilir.
+* Adında ip olmamalıdır.	
+* Adı küçük karakter veya rakam ile başlamamalıdır.
+
+Objeler yani dosyalar bir key'e sahiptir. Buradan key full path'dir.
+*<my_bucket>/my_file.txt*
+*<my_bucket>/my_folder/another_folder/my_file.txt*
+
+Bucketların içerisinde directory mantığı yoktur. Her ne kadar UI'da o şekilde görünse de, bu sadece görsel kolaylık için tasarlanmıştır.
+
+Max size 5 tb'dır ve **eğer 5 gb'dan daha fazla upload yapılacak ise, "multi-part-upload" yapılmalıdır (must).** 100 mb üzeri data upload yapılacak ise de kullanılabilir ve yine avantajı görünecektir.
+
+Metadata verileri, sistem veya kullanıcı metadata verileri olabilir. Tagler, security için kullanışlıdır. Versioning enable ise, Version ID bulunur.
+
+#### AWS S3 - Consistency Model
+
+Iki tür consistency vardir.
+
+**Strong (Immediate) Consistency**
+* Farkli client'larin, farkli veri kopyasini okuyarak, ayni bilginin dönmesi durumudur.
+* Herhangi bir storage node'da, herhangi bir update olmasi durumunda, veri client için available olmadan önce, değişim bütün storage node'larda olması saglanir.
+* Transactional database ve real time sistemler icin uygundur.
+* Scalability and Availability icin iyi degildir.
+
+
+**Eventually Consistency**
+* Farklı veri kopyasini ayni zamanda okumak farklı sonuçlara neden olabilir.
+* Blocking mekanizması yoktur, veri obje olarak update edilirse ve o an başka node'dan okuma yapılırsa, aynı data gelmeyecektir. Zamanla update diğer node'larda da yapılacaktir ve okumalar eventually consistent olacaktır.
+* Eventually consistency; scalability, availability, data durability sağlar bu nedenle cost storage'i düşürür ve bunlar object storage icin required'dir.
+
+**Yeni gelen objeler(http put), immediate veya diğer adı ile strong consistency** (Read(get)-after-write(put)) ile S3 yazılmaktadir.
+**http put,** update veya add olabilir
+**http get,** read işlemidir.
+
+**Mevcut bir obje üzerinde, update(http put) veya delete islemi yapiliyorsa, bu işlem eventually consistency olacaktır.**
+
+### S3 Storage Tiers
+S3'de, birden fazla storage katmanı vardır.
+
+* Amazon S3 Standard - General Purpose
+* Amazon S3 Standard-Infrequent Access (IA)
+* Amazon S3 One Zone-Infrequent Access
+* Amazon S3 Reduced Redundancy Storage (deprecated)
+* Amazon S3 Intelligent Tiering (new!)
+* Amazon Glacier
+
+#### S3 Standard – General Purpose
+
+* Multiple AZ'da objeler için high durability yani çok yüksek dayanıklılık 11-9s (% 99.999999999)
+    * S3'de 10 milyon obje saklanıyorsa, 10.000 yılda bir kez obje kaybı gerçekleşir.
+* Yılda % 99.99 availability
+* 2 eşzamanlı AZ arızasına karşı veri koruması sağlar. Veri üç AZ'da yazılmadan, available olmaz
+
+**Use Cases,** Big Data analytics, mobile ve oyun uygulamaları gibi.
+
+#### S3 Reduced Redundancy Storage (RRS) - Deprecated (Kullanımdan kaldırıldı)
+
+* %99.99 objeler için durability sağlayacak şekilde tasarlanmıştır.
+* Yılda % 99.99 availability
+* 1 AZ arızasına karşı veri koruması sağlar. Veri iki AZ birden yazılmadan, available olmaz
+
+**Use Cases,** Kritik olmayan ve yeniden üretilebilecek çok kritik olmayan veriler için uygundur.
+
+
+#### S3 Standard – Infrequent Access (IA)
+* Daha az erişilen ama ihtiyaç halinde hızla ulaşılabilecek veriler için uygundur.
+* Multiple AZ'da objeler için high durability yani çok yüksek dayanıklılık 11-9s (% 99.999999999)
+* Yılda % 99.9 availability
+* Amazon S3 standart'a göre daha hesaplıdır.
+* 2 eşzamanlı AZ arızasına karşı veri koruması sağlar. Veri üç AZ'da yazılmadan, available olmaz
+
+**Use Cases,** Disaster recovery ve backup verileri için uygundur.
+
+
+#### S3 One Zone - Infrequent Access (IA)
+
+* S3 Standard Infrequent Access ile aynıdır ancak burada veri bir tek AZ'da tutulur.
+* Bir AZ'da objeler için high durability yani çok yüksek dayanıklılık 11-9s (% 99.999999999). AZ zarar görürse, data da zarar görür.
+* Yılda %99.5 Availability
+* Low latency ve high throughput sağlar.
+* At transit ve at rest encryption sağlar.
+* Standart IA oranla %20 daha uzuzdur.
+
+**Use Cases,** İkinci backup kopyasını saklanmasına veya yeniden üretilebilecek önemsiz veriler için kullanılabilir.
+
+
+#### S3 Intelligent Tiering (new!)
+
+* S3 standart gibi düşük latency ve yüksek throughput sağlar.
+* Düşük bir monitoring ve auto-tiering ücretlendirmesi vardır.
+* Değişen erişim modellerine bağlı olarak objeleri iki erişim katmanı yani tier arasında otomatik olarak taşır.
+* Multiple AZ'da objeler için high durability yani çok yüksek dayanıklılık 11-9s (% 99.999999999)
+* Bütün AZ etkileyen olası etkilere karşı fazladan koruma sağlar.
+* Yılda % 99.9 availability
+
+#### S3 Glacier
+
+* Arşiveleme ve yedekleme için uygundur.
+* Datalar uzun süreli saklanmaktadır.
+* On-Premise tape storage'a alternatiftir.
+* Yıllık ortalama % 99.999999999 durability
+* Ortalama olarak gb başına 0.004$ depolama maaliyeti vardır. Veriyi geri çağırma bu maaliyetin dışındadır.
+* Glacier'da bulunan her item "Archive" olarak adlandırılır ve bir archive en fazla 40 tb olabilir.
+* Archive'lar Vault adında yapılarda tutulur.
+* 3 çeşit veriyi geri çağrıma seçeneği vardır;
+    * Expedited, 1-5 dk arasında veriye ulaşılabilir ve Gb başına 0.03$ ve request başına 0.01$ olacak şekilde ücretlendirilir.
+    * Standart, 3-5 saat arasında veriye ulaşılabilir ve Gb başına 0.01$ ve 1000 request başına 0.05$ olacak şekilde ücretlendirilir.
+    * Bulk, 5-12 saat arasında veriye ulaşılabilir ve Gb başına 0.0025$ ve request başına 0.025$ olacak şekilde ücretlendirilir.
+
+![image26](images/image26.png)
+
+#### S3 Lifecycle Rules
+
+Objenin ne kadar süre belirli bir bucketda kalacaği, başka bir bucketa taşınacaği veya silineceği bilgisini tutar.
+Bu şekilde tanımlanacak bir rule ile farklı tipte storage katmanlarına veri belirli sürelerde aktarılabilir ve maaliyet düşürülebilir.
+
+**Örneğin:** General Purpose => Infrequent Access => Glacier
+
+**Transition actions:** Bir objenin ne zaman başka bir storage class'a taşınacağını tanımlar. Örneğin, Data 7 ay General Purpose S3 storage sınıfında kaldıktan sonra Glacier'a alınması gibi.
+
+**Expiration actions:** Belirlenen belli bir zamandan sonra objenin silinmesine yardımcı olur. Örneğin, Access loglar tanımlanan bellir bir zaman diliminden sonra silinebilir.
+
+Glaciera data taşınması; backup, uzun süreli retention gibi ihtiyaçlar için kullanışlıdır.
+
+Rule tanımlarken bir çok esnekliği sahip oluruz. Transition rule'da; mevcut versiyon mu yoksa bir önceki versiyonun mu taşınacağı expiration rule'da mevcut versiyon mu yoksa bir önceki versiyonun mu expire yani silineceği, ne zaman tamamen silineceği gibi bir çok tanım yapabiliriz.
+
+### AWS S3 – Versioning
