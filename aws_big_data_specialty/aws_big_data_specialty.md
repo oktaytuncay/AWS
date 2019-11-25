@@ -1,6 +1,13 @@
+  * [Collection](#collection)
+    * [Kinesis](#kinesis)
+        * [Kinesis Streams](#kinesis-streams)
+    * [AWS SQS](#aws-sqs)
+
+<a name="#collection"></a>
 # Collection
 
-## Kinesis Data Stream
+<a name="#kinesis"></a>
+## Kinesis
 
 • Kinesis Kafka’nın bir alternatifi olarak kullanılmaktadır.
 • Real-time olarak yüksek oranda veriyi yakalamak için idealdir.
@@ -22,7 +29,8 @@ Near real-time çalışan bir servistir.
 
 ![image1](images/image1.png)
 
-### Kinesis Stream
+<a name="#kinesis-streams"></a>
+### Kinesis Streams
 
 Consumer veriyi shard’lardan okur.
 
@@ -150,10 +158,10 @@ DynamoDB'nin bu vazifesi nedeni ile yeteri kadar WCU (Write Capacity Unit) veya 
 
 **Örnek:** KPL kullanarak, çeşitli producer'lardan ortamala 8mb/s ile 10 shard içeren Kinesis Stream'den veri alınınan bir yapı var ve yapı içerisinde bulunan kayıtlar KCL kullanarak consume ediliyor. CloudWatch metricleri ile verinin 2mb/s throughput'a sahip olduğunu ve uygulumada gecikme yaşandığı anlaşılıyor. Bu sorunun en muhtemel nedeni ne olabilir?
 
-• Shard'ların biraz daha bölünmesi gerekmektedir.
-• Hot partition durumu vardır.
-• CloudWatch, aggregate için değil, ortalama throughput göstermektedir
-• **DynamoDB tablosu ihtiyacı karşılamayamamaktadır.**
+- [ ] Shard'ların biraz daha bölünmesi gerekmektedir.
+- [ ] Hot partition durumu vardır.
+- [ ] CloudWatch, aggregate için değil, ortalama throughput göstermektedir
+- [x] DynamoDB tablosu ihtiyacı karşılayamamaktadır.
 
 **Kinesis Connector Library:**
 Eski (2016) Java library'dir ve connector EC2'de olmak zorundadır. Data; S3, DynamoDB, Redshift ve ElasticSearch'e yazılır.
@@ -267,4 +275,5 @@ Firehose için minimum buffer time 1 dakikadır.
 • Otomatik scale olabilmektedir.
 • Data storage özelliği yoktur.
 
+<a name="#aws-sqs"></a>
 ## AWS SQS
