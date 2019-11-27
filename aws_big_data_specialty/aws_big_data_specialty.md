@@ -1,7 +1,88 @@
   * [Collection](#collection)
     * [Kinesis](#kinesis)
         * [Kinesis Streams](#kinesis-streams)
+		* [Kinesis Producers](#kinesis-producers)
+		* [Kinesis Consumers](#kinesis-producers)
+		* [Kinesis Enhanced Fan Out](#kinesis-enhanced-fanout)
+		* [Kinesis Scaling](#kinesis-scaling)
+		* [Kinesis Security](#kinesis-security)
+		* [Kinesis Data Firehose](#kinesis-firehose)
+			* [Kinesis Data Streams vs Firehose](#kinesis-streams-firehose)
     * [AWS SQS](#aws-sqs)
+		* [AWS SQS Fifo Queue](#aws-sqs-fifo)
+		* [AWS SQS Security](#aws-sqs-security)
+		* [Kinesis Data Stream vs SQS](#kinesis-sqs)
+	* [IoT (Internet of Things)](#iot)
+	* [DMS – Database Migration Service)](#dms)
+	* [Direct Connect](#direct-connect)
+	* [Snowball](#snowball)
+		* [Snowball Process](#snowball-process)
+		* [Snowball Edge](#snowball-edge)
+		* [AWS Snowmobile](#snowmobile)
+  * [Storage](#storage)
+    * [AWS S3](#s3)
+		* [AWS S3 - Consistency Model](#s3-consistency)
+		* [S3 Storage Tiers](#s3-tiers)
+		* [S3 Lifecycle Rules](#s3-lifecycle)
+		* [S3 Versioning](#s3-versioning)
+		* [S3 Cross Region Replication](#s3-cross-region)
+		* [S3 – ETag (Entity Tag)](#s3-etag)
+		* [S3 – Performance](#s3-performance)
+		* [S3 – Encryption](#s3-encryption)
+		* [S3 – Security](#s3-security)	
+		* [S3 – CORS (Cross-Origin Resource Sharing)](#s3-cors)
+    * [DynamoDB](#dynamodb)
+	    * [DynamoDB RCU & WCU](#dynamodb-rcu-wcu)
+	    * [DynamoDB Partitions](#dynamodb-partitions)
+	    * [DynamoDB Indexes](#dynamodb-indexes)
+	    * [DynamoDB DAX](#dynamodb-dax)
+	    * [DynamoDB Streams](#dynamodb-streams)
+	    * [DynamoDB Security](#dynamodb-security)
+    * [AWS ElastiCache](#elastiCache)
+		* [Redis](#redis)
+	    * [Memcached](#memcached)
+  * [Processing](#processing)
+	* [AWS Lambda](#lambda)
+	* [AWS Glue](#aws-glue)
+	* [AWS EMR (Elastic MapReduce)](#aws-emr)
+		* [Hive Metastore, Pig, HBase](#hive-pig-hbase)
+		* [Presto](#presto)
+		* [Zeppelin ve EMR Notebooks](#zeppelin-emr)
+		* [Hue, Splunk ve Flume](#hue-splunk-flume)
+		* [Diğer Servisler](#diger)
+		* [EMR Security](#emr-security)
+	* [Machine Learning](#machine-learning)
+		* [Amazon Machine Learning](#amazonml)
+		* [SageMaker](#sagemaker)
+		* [Deep Learning 101](#deep-learning)
+	* [AWS Data Pipeline](#data-pipeline)
+  * [Analysis](#analysis)
+	* [Kinesis Analytics](#kinesis-analytics)
+	* [Elasticsearch](#elasticsearch)
+		* [Kibana](#kibana)
+		* [Amazon Elasticsearch Service](#aws-elasticsearch)
+	* [Athena](#athena)
+		* [Athena + Glue](#athena-glue)
+	* [Redshift](#redshift)
+		* [Redshift Spectrum](#redshift-spectrum)
+		* [Redshift Distribution Tipleri](#redshift-distribution)
+		* [Redshift Sort Keys](#redshift-sort-keys)
+		* [Redshift Data Flows](#redshift-data-flow)
+		* [Diğer Servislerle Entegrasyonu](#redshift-entegration)
+	* [Amazon RDS (Relational Database Service)](#amazon-rds)
+  * [Visualization](#visualization)
+	* [Amazon Quicksight](#quicksight)
+  * [Security](#security)
+	* [Encryption 101](#encryption-101)
+	* [AWS KMS (Key Management Service)](#aws-kms)
+	* [Cloud HSM (Hardware Security Module)](#cloud-hsm)
+	* [Security AWS Services](#security-aws-services)	
+	* [STS ve Cross Account Access](#sts)
+	* [Identity ve SAML Federation](#identity-saml-federation)
+	* [Policies](#policies)
+	* [AWS CloudTrail](#cloudtrail)
+	* [VPC Endpoints](#endpoints)
+  * [AWS Instance Types](#instance-types)
 
 <a name="#collection"></a>
 # Collection
@@ -64,7 +145,8 @@ Push model olduğundan, API call gerekmiyor.
 
 Data retention default 24 saat ve max 7 güne kadar arttırılabilir.
 
-#### Kinesis Producers
+<a name="#kinesis-producers"></a>
+### Kinesis Producers
 
 **Kinesis SDK:** SDK (Software Development Kit) kod yazılmasını veya CLI kullanarak datayı direk Amazon Kinesis Stream’e gönderilmesini sağlar. Genel olarak, bir SDK bir uygulama içinde belirli bir modül oluşturmak için ihtiyaç duyulan her şeyden oluşur ve kütüphaneler, araçlar, örnek kod, ilgili belgeler ve çoğu zaman API’ler içerebilir.
 
@@ -74,15 +156,17 @@ Data retention default 24 saat ve max 7 güne kadar arttırılabilir.
 
 Kinesis Stream’e data göndermek için; Apache Spark, Nifi, Kafka connect gibi 3rd party uygulamalar da kullanılabilir.
 
-##### Kinesis Producer SDK
+#### Kinesis Producer SDK
 
-API’lar bir kayıt (PutRecord) veya birden fazla kayıt (PutRecords) için kullanılabilir. PutRecords batch işlemler için kullanılır, daha az http request yapılmasını sağlar ve throughput arttırır. Producer SDK; Android veya IOS mobile cihazlar gibi çeşitli servisler için kullanılabilir. Düşük throughput, yüksek latency, simple API ve AWS Lambda gibi use case’lerde kullanılabilir.
+API’lar bir kayıt (PutRecord) veya birden fazla kayıt (PutRecords) için kullanılabilir. PutRecords batch işlemler için kullanılır, daha az http request yapılmasını sağlar ve throughput arttırır. Producer SDK; Android veya IOS mobile cihazlar gibi çeşitli servisler için kullanılabilir. 
+
+Düşük throughput, yüksek latency, simple API ve AWS Lambda gibi use case’lerde kullanılabilir.
 
 ProvisionedThroughputExceeded hatası alınırsa, herhangi bir shard için TPS veya mb/s limiti aşılmış demektir. Hatanın önlenmesi için Hot Shard olmaması sağlanmalıdır. Örneğin, key olarak device_id ise ve datanın %90’ı aynı device_id’ye ait ise, bu durumda datanın %90’ı aynı partition’da olacaktır ve o partition’daki yoğunluk bu hatanın alınmasına neden olabilecektir.
 
 Hot Shard olmamasına rağmen hata alınıyorsa, işlem tekrar denenebilir veya shard sayısı arttırılabilir.
 
-##### Kinesis Producer Library
+#### Kinesis Producer Library
 
 * Kullanımı kolaydır, C++ ve Java library'leri ile yapılandırılabilir. 
 * Yüksek performans ihtiyacı olan uzun süreli kullanımlar için uygundur .
@@ -103,7 +187,7 @@ Batch işlemler kendi içinde ikiye ayrılır.
 
 KPL kayıtları, KCL ile ve özel yardımcı library'ler ile de-coded edilmelidir.
 
-Kinesis Producer Library (KPL) Batching
+##### Kinesis Producer Library (KPL) Batching
 
 ![image3](images/image3.png)
 
@@ -118,7 +202,8 @@ Bu süre bir miktar gecikme oluşturur ancak verimliliği ciddi oranda arttırma
 Log dosyalarını monitor eder ve bunları Kinesis Data Stream'e gönderir.
 Java-based bir agent'dır ve sadece linux-based server'larda kurulabilir.
 
-###### Kinesis Consumer(s) – Classic
+<a name="#kinesis-consumers"></a>
+### Kinesis Consumers
 
 ![image4](images/image4.png)
 
@@ -138,7 +223,7 @@ Saniyede en fazla 5 GetRecords API call yapılabileceğinden, her consumer uygul
 
 Enhanced fan out modda, ne kadar consumer olursa olsun, her consumer saniyede 2mb throughput'a sahip olur. Yani her consumer 2mb/s veri alır ve ortamala latency 70ms olur.
 
-##### Kinesis Client Library
+#### Kinesis Client Library
 
 Java-based bir library'dir ama Golang, Python, Ruby, Node, .NET ile de kullanılabilir. KPL aggregation yapar ve KCL, KPL ile üretilen verilerin okunmasını sağlar.
 
@@ -163,7 +248,8 @@ DynamoDB'nin bu vazifesi nedeni ile yeteri kadar WCU (Write Capacity Unit) veya 
 - [ ] CloudWatch, aggregate için değil, ortalama throughput göstermektedir
 - [x] DynamoDB tablosu ihtiyacı karşılayamamaktadır.
 
-**Kinesis Connector Library:**
+#### Kinesis Connector Library
+
 Eski (2016) Java library'dir ve connector EC2'de olmak zorundadır. Data; S3, DynamoDB, Redshift ve ElasticSearch'e yazılır.
 
 Kinesis Firehose ve Lambda Kinesis Connector Library'nin kullanım alanlarının bir çoğunu almıştır.
@@ -172,7 +258,9 @@ Kinesis Firehose ve Lambda Kinesis Connector Library'nin kullanım alanlarının
 
 Lightweight ETL için de kullanılabilir. Programlaması yapıldığı sürece Amazon S3, DynamoDB, Redshift, ElasticSearch veya istenilen herhangi bir yere data gönderilebilir. Ayrıca notification oluşturmak ve real time mail göndermek için de kullanılabilir.
 
-**Kinesis Enhanced Fan-Out:**
+<a name="#kinesis-enhanced-fanout"></a>
+### Kinesis Enhanced Fan Out
+
 KCL 2.0 ve Lambda ile çalışır.
 Bütün consumer'lar, shard başına 2mb/s throughput sağlar. 20 consumera sahipsek, shard başına saniyede 40mb throughput alırız. Data http/2 üzerinden consumerlara gönderilir ve ortalama 70 ms latency sağlar.
 
@@ -190,7 +278,10 @@ https://aws.amazon.com/kinesis/data-streams/pricing/?nc1=h_ls
 
 Default her Data Stream için enhanced fan-out kullanacak 5 consumer limiti vardir.
 
-**Kinesis Scaling:** Shard Splitting olarak geçer.
+<a name="#kinesis-scaling"></a>
+### Kinesis Scaling
+
+Shard Splitting olarak geçer.
 
 Stream kapasitesinin arttırılması için kullanılır. (Her Shard için 1 mb/s data) Hot Shard'ın bölünmesi için de kullanılabilir.
 
@@ -220,7 +311,8 @@ Aynı anda sadece 1 tane resharding işi yapılabilir ve bu işin süresi shard 
 * Bir stream için 500 shard’dan fazla scale up işi yapılamaz.
 * Scale up işi account limitinden daha fazla olamaz.
 
-**Kinesis Security:**
+<a name="#kinesis-security"></a>
+### Kinesis Security
 
 * Authorization kısmı IAM policy tarafından yönetilir.
 * In flight encryption https endpoint'ler ile yapılır.
@@ -228,6 +320,7 @@ Aynı anda sadece 1 tane resharding işi yapılabilir ve bu işin süresi shard 
 * Client side encryption manual olarak implemente edilmelidir.
 * VPC Endpoint, Kinesis'in VPC'ye erişmesi için kullanılabilir.
 
+<a name="#kinesis-firehose"></a>
 ### Kinesis Data Firehose
 
 Administration maaliyeti olmayan AWS tarafından fully managed bir servistir.
@@ -260,6 +353,7 @@ Bu buffer zaman veya size tanımına göre flush olur. Örnek olarak buffer size
 
 Firehose için minimum buffer time 1 dakikadır.
 
+<a name="#kinesis-streams-firehose"></a>
 #### Kinesis Data Streams vs Firehose
 
 **Kinesis Data Streams:**
@@ -305,7 +399,8 @@ SQS olduğu zaman, consumerlar poll messages işini yapacak, consumerlar bu mesa
 
 Bu şekilde mesajlar farklı consumer uygulamaları tarafından process edilmemiş olacaklardır. Bu özellik SQS ve Kinesis arasındaki en büyük farklardan birisidir.
 
-#### AWS SQS Fifo Queue
+<a name="#aws-sqs-fifo"></a>
+### AWS SQS Fifo Queue
 
 SQS ilk olarak standart queue ile çıktı ve şu anda Fifo Queue olarak da hizmet sağlamaktadır. Açılım First In First Out'dur ve bütün regionlarda bulunmamaktadır.
 Queue adımının sonu .fifo ile bitmelidir.
@@ -338,7 +433,8 @@ SQS CloudWatch üzerinden Auto Scale olarak entegre edilebilir.
 * Data retention 1 dakika ve 14 gün arasındadır.
 * Yapılan API request ve network kullanımı üzerinden ücretlendirilir.
 
-#### SQS Security
+<a name="#aws-sqs-security"></a>
+### SQS Security
 
 * Https ile in-flight encryption sağlanır.
 * KMS ile server side encryption yapılabilir.
@@ -347,11 +443,12 @@ SQS CloudWatch üzerinden Auto Scale olarak entegre edilebilir.
 * IAM policy SQS kullanımına izin vermelidir.
 * SQS queue access policy, IP üzerinden kontrol ve requestlerin geldiği süre boyunca kontrol yapılabilir.
 
-#### Kinesis Data Stream vs SQS
+<a name="#kinesis-sqs"></a>
+### Kinesis Data Stream vs SQS
 
 Ne zaman SQS ve ne zaman Kinesis Data Stream kullanılmalıdır.
 
-Kinesis Data Stream
+##### Kinesis Data Stream
 
 * Data birden fazla kez consume edilebilir.
 * Data retention period sonrasında silinir.
@@ -362,7 +459,7 @@ Kinesis Data Stream
 * Shard kapasitesi, limite dayanmadan önce sağlanmalıdır.
 * Max 1 mb mesaj size'ı vardır.
 
-SQS
+##### SQS
 
 * Decouple yani ayrı uygulamalar için uygundur.
 * Que başına bir tane uygulama olabilir.
@@ -371,7 +468,6 @@ SQS
 * "Delay" message özelliği vardır.
 * Dinamik olarak scale olabilir.
 * Max 256 kb mesaj size'ı vardır.
-
 
 Kinesis Data Stream | SQS
 ------------ | -------------
@@ -409,7 +505,8 @@ SQS:
 * Database insert veya visual processing için buffer ve batch mesalar yapıları
 * Offloading requestleri
 
-### IoT (Internet of Things)
+<a name="#iot"></a>
+## IoT (Internet of Things)
 
 ![image16](images/image16.png)
 
@@ -446,7 +543,7 @@ Aşağıdaki linkte sadece 5 dakika olan bir tutorial izlenerek, bütün işleyi
 
 https://us-west-1.console.aws.amazon.com/iot/home?region=us-west-1#/learnHub
 
-#### IoT Device Gateway
+### IoT Device Gateway
 
 AWS'e bağlanan IoT cihazları için entry point görevi görür. Cihazların AWS'e güvenli ve verimli şekilde iletişim kurmasından sorumludur.
 
@@ -461,7 +558,7 @@ Kurallar MQTT topiclerinde tanımlanmaktadır.
 **Rules:** Tetiklenecek iş
 **Action:** Yapılmak istenen iş, şeklinde işler.
 
-Use cases:
+**Use cases:**
 
 * Bir cihazdan alınan verilerin DynamoDB'ye yazılması
 * S3'e dosya kaydedilmesi
@@ -474,7 +571,8 @@ Use cases:
 
 Rules kısmının, action olabilmesi için de IAM rollerine ihtiyaç duyulmaktadır.
 
-### DMS – Database Migration Service
+<a name="#dms"></a>
+## DMS – Database Migration Service
 
 Source veri tabanı migration sırasında aynı şekilde kullanılmaya devam edilebilir.
 
@@ -482,7 +580,7 @@ Aynı tip veri tabanlarından (Oracle to Oracle) birbirlerine ve farklı tip ver
 
 CDC (Captures Database Changes) kullanarak, data replikasyonu sağlanır. Replication tasklarının yapılmabilmesi için, EC2 instance'ı oluşturulması gerekmektedir.
 
-#### DMS Sources ve Target
+### DMS Sources ve Target
 
 **Sources**
 On-Premise ve EC2 instance veri tabanları olabilir. 
@@ -506,7 +604,8 @@ Database schema engine'i birinden bir diğerine convert olur.
 
 Örnek olarak, SQL Server veya Oracle gibi OLTP veri tabanları; MySQL, PostgreSQL, Aurora gibi veri tabanlarına convert edilir. Teradata veya Oracle gibi OLAP yapısına sahip olan veri tabanları Amazon Redshift gibi DWH ortamına migrate edilebilir.
 
-### Direct Connect
+<a name="#direct-connect"></a>
+## Direct Connect
 
 ![image20](images/image20.png)
 
@@ -529,7 +628,8 @@ Yukarıdaki diagramda görüldüğü gibi AWS Direct Connect endpoint ile hem Am
 
 Eğer direct connect bağlantısı aynı account'da bulunan farklı region'larda bulunan VPC'ler için isteniyorsa, Direct Connect Gateway kullanılmalıdır.
 
-### Snowball
+<a name="#snowball"></a>
+## Snowball
 
 Tb veya Pb düzeyindeki verilerin, AWS içinde veya dışında taşımaya yardımcı olan fiziksek veri taşıma çözümüdür.
 
@@ -540,7 +640,8 @@ Tb veya Pb düzeyindeki verilerin, AWS içinde veya dışında taşımaya yardı
 * Büyük Cloud migration, DC taşınması ve disaster recovery durumlarında tercih edilebilir.
 * **Bir veri taşıma network üzerinden 1 hafta veya daha uzun sürecek ise, snowball kullanmak hem daha hızlı hem de daha güvenli olacaktır.**
 
-#### Snowball Process
+<a name="#snowball-process"></a>
+### Snowball Process
 
 ![image22](images/image22.png)
 
@@ -551,7 +652,8 @@ Tb veya Pb düzeyindeki verilerin, AWS içinde veya dışında taşımaya yardı
 * Snowball tamamen temizlenir.
 * Süreç takibi SNS, text mesajları ve AWS console'dan yapılır.
 
-#### Snowball Edge
+<a name="#snowball-edge"></a>
+### Snowball Edge
 
 Cihaza compute yeteneği ekler ve aynı zamanda storage (24 vcpu) ve compute (52v cpu & opsiyonel gpu) optimized'dır. 
 
@@ -560,7 +662,8 @@ Cihaza compute yeteneği ekler ve aynı zamanda storage (24 vcpu) ve compute (52
 * Data taşınırken datanın pre-process edilmesine olanak sağlar.
 * Data migration, image karşılaştırma, IoT işleri ve machine learning için kullanımı uygundur.
 
-#### AWS Snowmobile
+<a name="#snowmobile"></a>
+### AWS Snowmobile
 
 ![image23](images/image23.png)
 
@@ -568,9 +671,11 @@ Exabytes yani 100 pb veri transferi sağlar.
 
 Her Snowmobile 100 pb kapasiteye sahiptir ve paralel kullanım sağlamaktadır. **Eğer taşınacak veri 10 pb fazla ise, Snowball yerine Snowmobile tercih edilmelidir.**
 
+<a name="#storage"></a>
 ## Storage
 
-### S3
+<a name="#s3"></a>
+### AWS S3
 
 Dosyaların yani objelerin bucketlara yani dizinlere konumlasını sağlar.
 
@@ -594,7 +699,8 @@ Max size 5 tb'dır ve **eğer 5 gb'dan daha fazla upload yapılacak ise, "multi-
 
 Metadata verileri, sistem veya kullanıcı metadata verileri olabilir. Tagler, security için kullanışlıdır. Versioning enable ise, Version ID bulunur.
 
-#### AWS S3 - Consistency Model
+<a name="#s3-consistency"></a>
+### AWS S3 - Consistency Model
 
 Iki tür consistency vardir.
 
@@ -615,7 +721,9 @@ Iki tür consistency vardir.
 
 **Mevcut bir obje üzerinde, update(http put) veya delete islemi yapiliyorsa, bu işlem eventually consistency olacaktır.**
 
+<a name="#s3-tiers"></a>
 ### S3 Storage Tiers
+
 S3'de, birden fazla storage katmanı vardır.
 
 * Amazon S3 Standard - General Purpose
@@ -687,7 +795,8 @@ S3'de, birden fazla storage katmanı vardır.
 
 ![image26](images/image26.png)
 
-#### S3 Lifecycle Rules
+<a name="#s3-lifecycle"></a>
+### S3 Lifecycle Rules
 
 Objenin ne kadar süre belirli bir bucketda kalacaği, başka bir bucketa taşınacaği veya silineceği bilgisini tutar.
 Bu şekilde tanımlanacak bir rule ile farklı tipte storage katmanlarına veri belirli sürelerde aktarılabilir ve maaliyet düşürülebilir.
@@ -702,7 +811,8 @@ Glaciera data taşınması; backup, uzun süreli retention gibi ihtiyaçlar içi
 
 Rule tanımlarken bir çok esnekliği sahip oluruz. Transition rule'da; mevcut versiyon mu yoksa bir önceki versiyonun mu taşınacağı expiration rule'da mevcut versiyon mu yoksa bir önceki versiyonun mu expire yani silineceği, ne zaman tamamen silineceği gibi bir çok tanım yapabiliriz.
 
-### AWS S3 – Versioning
+<a name="#s3-versioning"></a>
+### S3 Versioning
 
 S3'de bulunan objeler üzerinde versioning yapılabilir ve bir objenin birden fazla versiyonu aynı anda tutulabilir.
 
@@ -725,7 +835,8 @@ Versioning enable olduktan sonra suspend edilirse, mevcut objeler versiyonu "as 
 * Bu objeler bundan sonra update edilemez ve yeni gelenlerin versiyon ID'si de null olacaktir.
 * Yeni gelenlerin ID'si null olduğundan, bu objelerin yeni versiyonlari bir öncekini ezecektir ama enable halindeyken gelen objeler etkilenmeyecektir.
 
-#### S3 Cross Region Replication
+<a name="#s3-cross-region"></a>
+### S3 Cross Region Replication
 
 Hem source'da hem de destination'da versioning enable edilmesi gerekmektedir.
 
@@ -736,8 +847,8 @@ Hem source'da hem de destination'da versioning enable edilmesi gerekmektedir.
 
 **Use cases:** Başka bir region'da bulunan bir uygulama var ise bu uygulamanın düşük latency ile dataya erişimi sağlanabilir, accountlar arası replication yapılma istenirse kullanılabilir.
 
-
-#### AWS S3 – ETag (Entity Tag)
+<a name="#s3-etag"></a>
+### S3 – ETag (Entity Tag)
 
 Bir dosyanın zaten S3'e upload edildiğini nasıl teyit ederiz?
 
@@ -749,7 +860,8 @@ S3'de bulunan her objenin kendine ait bir ETag'i vardır.
 
 ETag kullanarak dosyanın doğruluğundan emin olabiliriz.
 
-#### S3 Performance
+<a name="#s3-performance"></a>
+### S3 Performance
 
 S3'de 100 TPS (transaction per second) ulaşıldığı zaman, S3 performansı düşebilir.
 
@@ -761,8 +873,8 @@ Bunun için de, perfomansı optimize etmek için, bucket'da tanımlanacak key ad
 *<my_bucket>/5r4d_my_folder/my_file1.txt*
 *<my_bucket>/a91e_my_folder/my_file1.txt*
 
-
 Yukarıdaki örneklerde 5r4d ve a91e random karakterler objelerin farklı partitionlara dağılmasını sağlayacaklardır.
+
 Prefix key olarak tarih kullanılması kesinlikle tavsiye edilmez. Tarih birden fazla kez kullanılabilir ve bu da benzerlik oluşuracağından, performans kaybına neden olabilir.
 
 <my_bucket>/11_08_2019_my_folder/my_file1.txt
@@ -784,7 +896,8 @@ SSE-KMS encryption kullanılıyor ise, bu kullanım için sınırlı olabilir.
 
 Amazon S3 Transfer Acceleration: Client ve S3 bucket arasında uzun mesafede hızlı, kolay ve güvenli biçimde dosya aktarımı sağlar. Transfer acceleration özelliği, Amazon CloudFront'un global distribute edge lokasyonlarını kullanır.
 
-#### S3 Encryption***
+<a name="#s3-encryption"></a>
+### S3 Encryption
 
 S3'de bulunan objeler için 4 farklı encryption bulunmaktadır.
 
@@ -820,7 +933,7 @@ Amazon S3 encryption key'i muhafaza etmez. Key müşteri tarafından yönetilir,
 * Https kullanılması mecburidir
 * Yapılan her http requesti için encryption key http header'ında verilmelidir.
 
-##### Client Side Encryption
+#### Client Side Encryption
 
 ![image30](images/image30.png)
 
@@ -832,20 +945,15 @@ Encryption key ve bu cycle tamamen müşteri tarafından yönetilir.
 İstenilen endpoint kullanılabilir ama https kullanılması tavsiye edilir.
 SSE-C için https mecburidir. Encryption in fligt SSL/TLS olarak da tanımlanabilir.
 
-##### S3 CORS (Cross-Origin Resource Sharing)***
-Client web application'ın başka bir domain'den resource request etmesidir.
+<a name="#s3-security"></a>
+### S3 – Security
 
-Eğer başka bir websitesinden data talep edilecek ise, CORS enable edilmelidir.
-Cross Origin Resource Sharing, dosya paylaşımın sınırlanmasını sağlar ve böylece maaliyetin düşürülmesine de faydası olur.
-
-##### S3 Access Logs
+### S3 Access Logs
 
 Audit için kullanılınır.
 S3 bucketlara olan bütün erişimlerin loglanmasını sağlar. Başka bir accountdan yapılan bütün başarılı ve başarısız taleplerin loglanması sağlanır.
 
 Buradan alınan data, Kinesis Analytics toollar veya Amazon Athena ile analiz edilebilir.
-
-#### S3 Security
 
 **User based**
 **IAM policies:** Belirli bir kullanıcı için izin verilecek API call'ları belirlenmesini sağlar.
@@ -863,8 +971,7 @@ JSON based policies
 
 **S3 bucket policy:** Bucket'a public erişim verilmesi, upload sırasında objelerin encrypt edilmesine zorlanması, başka bir account'a ait kullanıcıya yetki verme gibi işlemler için kullanılır.
 
-
-##### S3 Default Encryption vs Bucket Policies
+#### S3 Default Encryption vs Bucket Policies
 
 ![image31](images/image31.png)
 
@@ -883,7 +990,7 @@ Bucket policyler, default encryption önce değerlendirilir yani sıralamada ön
 * **MFA:** (Multi Factor Authentication), objelerin silinmesi için ek güvenlik olarak kullanılabilir.
 * **Signed URLs:** URL'ler sadece belirli süre aktif olarak kalmaktadır.
 
-##### Glacier Vault Policies & Vault Lock
+#### Glacier Vault Policies & Vault Lock
 
 Vault bir archive collection'dır. Her vault bir tane vault access policy ve bir tane vault lock policy sahiptir.
 
@@ -896,6 +1003,15 @@ Vault bir archive collection'dır. Her vault bir tane vault access policy ve bir
 
 **Not:** *** Gzip, 1 GB'den daha büyük dosyalar için uygun bir sıkıştırma yöntemi değildir. 1gb büyük dosyalar için bzip2 gibi splitting desteği olan compression ile veya Snappy gibi daha yüksek sıkıştırma oranına sahip tekniklerle yapılmalıdır.
 
+<a name="#s3-cors"></a>
+### S3 CORS (Cross-Origin Resource Sharing)
+
+Client web application'ın başka bir domain'den resource request etmesidir.
+
+Eğer başka bir websitesinden data talep edilecek ise, CORS enable edilmelidir.
+Cross Origin Resource Sharing, dosya paylaşımın sınırlanmasını sağlar ve böylece maaliyetin düşürülmesine de faydası olur.
+
+<a name="#dynamodb"></a>
 ## DynamoDB
 
 AWS tarafından fully managed olan ve 3 ayrı AZ'da high available olarak hizmet veren NoSQL bir veri tabanıdır.
@@ -920,7 +1036,7 @@ DynamoDB tablolardan yapılır. Bütün tablolar kendi primary key'lerine sahipt
 * **Document Types:** List, Map
 * **Set Types:** String Set, Number Set, Binary Set
 
-#### DynamoDB – Primary Keys
+### DynamoDB – Primary Keys
 
 **Opsiyon 1:** Partition key only (Hash)
 
@@ -956,7 +1072,7 @@ Belli bir müşteri bu problemi yaşadığından ve PK kolonun company ID olmas�
 
 Bu gibi bir durumda Data Pipeline ile data başka bir DynamoDB tablosuna başka bir PK ile migrate edilebilir ve bu şekilde datanın eşit olarak distribute edilmesi sağlanabilr.
 
-##### DynamoDB in Big Data
+#### DynamoDB in Big Data
 
 En fazla kullanılan alanlar aşağıdaki gibidir;
 
@@ -980,8 +1096,10 @@ Aşağıdaki alanlar için uygun değildir.
     * Bu tip objelerin store edilmesi için S3 için daha uygundur ama metadata yönetimi DynamoDB'ye verilebilir.
 * Düşük I/O oranına sahip büyük veriler. S3 için uygundur
 
+<a name="#dynamodb-rcu-wcu"></a>
+### DynamoDB RCU & WCU
 
-##### DynamoDB – Provisioned Throughput
+#### DynamoDB – Provisioned Throughput
 
 Tablo read ve write capacity unit'sa sahip olmalıdır.
 * **Read Capacity Units (RCU):** okuma için throughput
@@ -994,8 +1112,7 @@ Tablo read ve write capacity unit'sa sahip olmalıdır.
 
 Bir partition throughput tam olarak kullanılmadığında, DynamoDB kullanılmayan kapasitenin bir kısmını daha sonraki ani artışlarla başa çıkmak için saklı tutar. DynamoDB ayrılan bu burst capacity'i background maintenance ve diğer işler için de otomatik kullanabilir.
 
-
-##### DynamoDB – Write Capacity Units***
+#### DynamoDB – Write Capacity Units***
 
 Bir write capacity, saniyede 1 kb boyutunca bir öğe için yazmayı temsil eder. Item 1kb'dan büyük ise, daha fazla capacity gerekir.
 
@@ -1003,7 +1120,7 @@ Bir write capacity, saniyede 1 kb boyutunca bir öğe için yazmayı temsil eder
 **Örnek 2:** Saniyede her biri 4.5 kb olan 6 obje yazmış olalım. 6x5 = 30 WCU gerekli olacaktır. Her obje tek başına 5 WCU ihtiyaç duyacaktır.
 **Örnek 3:** Dakikada her biri 2 kb olan 120 obje yazmış olalım. 120/60x2 = 4 WCU gerekli olacaktır.
 
-##### Strongly Consistent Read vs Eventually Consistent Read
+#### Strongly Consistent Read vs Eventually Consistent Read
 
 ![image34](images/image34.png)
 
@@ -1017,8 +1134,7 @@ Bu durumda Eventually Consistent Read yapılıyor ise, 1'den yapılacak okuma ve
 
 By default, DynamoDB Eventually Consistent Reads kullanır ancak GetItem, Query & Scan, True olarak ayarlanırsa, Consistent Read sağlanır.
 
-
-##### DynamoDB – Read Capacity Units***
+#### DynamoDB – Read Capacity Units***
 
 Bir Read Capacity, saniyede 4 kb boyunda bir strongly consistency ve saniyede 8 kb boyunda bir eventually consistency temsil eder.
 
@@ -1028,7 +1144,7 @@ Eğer item 4 kb büyük ise, daha fazla RCU gerekecektir.
 **Örnek 2:** Saniyede her biri 12 kb olan 16 eventually consistent read için, (16/2)x(12/4) = 24 RCU gerekecektir.
 **Örnek 3:** Saniyede her biri 6 kb olan 10 strongly consistent read için, 10x8 kb/4 = 20 RCU gerekecektir.
 
-##### DynamoDB – Throttling
+#### DynamoDB – Throttling
 
 Eğer RCU veya WCU aşarsak, ProvisionedThroughputExceededExceptions hatası alınır.
 
@@ -1038,8 +1154,8 @@ Hot keys yani partitionlardır. Belli bir partition key çok fazla okuma alıyor
 **Çözüm:**
 Partition key mümkün olduğu kadar distribute edilmelidir. Eğer RCU sorunu ise, DynamoDB Accelerator kullanılabilir. (DAX)
 
-
-##### DynamoDB – Partitions
+<a name="#dynamodb-partitions"></a>
+### DynamoDB Partitions
 
 DynamoDB'de tablo oluşturulduğu zaman her tablo 1 tane partition ile başlar ve partitionların belli sınırları vardır. Partitionlar en fazla 3000 RCU ve 1000 WCU barındırabilir ve en fazla 10 gb büyüklüğüne ulaşabilir.
 
@@ -1064,6 +1180,7 @@ Partition sayısını hesaplayabilmemiz için aşağıdaki gibi bir denklemden f
 **UpdateItem:** Varolan mevcut datanın update edilmesidir. Attributesların kısmi olarak güncellenmesidir.
 
 **Conditional Writes:**
+
 * Yazma talebini ancak mevcut koşullar sağlandığında kabul et, aksi hale reddet
 * Itemlara eş zamanlı olarak erişimin sağlanmasıdır
 * Performans etkisinin olmamasıdır.
@@ -1076,15 +1193,15 @@ Her biri 2kb olan saate 1 milyon dosya üreten bir uygulama için hesaplarsak,
 **DynamoDB:** 1M/hour = 277 Writes per Second x 2KB = 554 WCU = ~623 dolar (with Storage)
 **S3:** 1M/hour x 24 x 30 = 720 Million PUT request = ~3633.12 dolar (with Storage)
 
-
-#### DynamoDB – Deleteing Data
+#### DynamoDB – Deleting Data
 
 **DeleteItem:** Bellir bir satırı silme işlemidir. Condition kullanılarak silme işini yapabilir.
 **DeleteTable:** Bütün tabloyu ve tabloya ait bütün itemları siler. DeleteItem'dan çok daha hızlı çalışır.
 
-
 #### DynamoDB – Batching Writes
+
 **BatchWriteItem:**
+
 * Bir işlemde 25 PutItem veya 25 DeleteItem yapılabilir.
 * 16 mb kadar veri yazılabilir.
 * Her item için 400 kb kadar veri yazılabilir.
@@ -1095,9 +1212,10 @@ Yapılacak işlemler paralel yapılarak, daha fazla verim alınmasi sağlanır.
 
 Bir batch işleminin bir kısmının fail olmasi mümkündür ve bu gibi bir durumda, exponential back-off algoritmasi kullanarak fail olan itemlar için işlem tekrar denenebilir.
 
-
 #### DynamoDB – Reading Data
+
 **GetItem:**
+
 * Primary key baz alınarak okuma yapılır.
 * Primary key = hash veya hash-range olabilir. Yani partition key de olabilir, partition key + sort key'de (hash+range) olabilir.
 * By default olarak eventually consistent read yapılır.
@@ -1110,8 +1228,7 @@ Bir batch işleminin bir kısmının fail olmasi mümkündür ve bu gibi bir dur
 * 16 Mb dataya kadar kullanılabilir.
 * Itemlar paralel çagrılarak daha fazla verim alınmasi sağlanır.
 
-
-**DynamoDB – Query**
+##### DynamoDB – Query
 
 Sorgu aşağıdakilere göre itemlari döndürür.
 
@@ -1120,12 +1237,13 @@ Sorgu aşağıdakilere göre itemlari döndürür.
 * FilterExpression, bir nevi client side filtering'dir.
 
 **Returns:**
+
 * Limit olarak tanımlanan item sayısına kadar veya 1 mb dataya kadar veri sorgulanabilir.
 
 Gelen sonuca pagination yani sayfalandırma yapma yeteneği vardır.
 
-
 **DynamoDB – Scan**
+
 * Bütün tablonun taranması ve istenmeyen verinin filtrelenmesidir.
 * 1 mb'a kadar veri döndürebilir ve okuma işine devam etmek icin pagination özelliğini kullanır.
 * Çok fazla RCU tüketir.
@@ -1136,8 +1254,10 @@ Gelen sonuca pagination yani sayfalandırma yapma yeteneği vardır.
     * Paralel taramaların etkisini, Scan için oldugu gibi sınırlandırılabilir.
     * ProjectionExpression + FilterExpression kullanılabilir. (RCU'da değişim olmaz)
 
+<a name="#dynamodb-indexes"></a>
+### DynamoDB Indexes
 
-#### DynamoDB – LSI (Local Secondary Index)
+#### LSI (Local Secondary Index)
 
 ![image36](images/image36.png)
 
@@ -1149,7 +1269,7 @@ Gelen sonuca pagination yani sayfalandırma yapma yeteneği vardır.
 * Tanımlanan LSI'de (Local Secondary Index) WCU tüketilmesine neden olabilir.
     * Tabloya bir item eklenirse, update olursa veya silinirse; LSI güncellenir ve bu işlem sırasında da, WCU tüketilir
 
-#### DynamoDB – GSI (Global Secondary Index)
+#### GSI (Global Secondary Index)
 
 ![image37](images/image37.png)
 
@@ -1162,8 +1282,8 @@ Gelen sonuca pagination yani sayfalandırma yapma yeteneği vardır.
 * Index için ayrıca RCU/WCU belirtilmelidir.
 * Sonradan GSI eklenebilir ve modify edilebilir.
 
-
 **Yeteri kadar WCU olmasına rağmen, DynamoDB yazma işlerinde darboğaz yaşanıyorsa;**
+
 CloudWatch istatistikleri; consume edilen ve provision (sağlanan) throughput istatistikerini göstererek sorunu anlamamızda yardımcı olabilir.
 
 CloudWatch dışında, tabloda tanımlanan LSI'de (Local Secondary Index) WCU tüketilmesine neden olabilir.
@@ -1174,7 +1294,8 @@ Tabloya bir item eklenirse, update olursa veya silinirse; LSI güncellenir ve bu
 
 LSI aksine, GSI (Global Secondary Index) birincil tablo kapasitesini etkilememektedir.
 
-#### DynamoDB – DAX
+<a name="#dynamodb-dax"></a>
+### DynamoDB DAX
 
 ![image38](images/image38.png)
 
@@ -1191,7 +1312,8 @@ Tablolardan yapılacak olan yüksek sayıda okumanın önüne geçeceğinden, Ho
 * Multi AZ olarak çalışır ve production için en az üç node tavsiye edilir.
 * KMS ile encryption at rest, VPC güvenlik katmanları, IAM, CloudTrail gibi yazılımlar ile güvenliği sağlanabilir.
 
-##### DynamoDB Streams
+<a name="#dynamodb-streams"></a>
+### DynamoDB Streams
 
 ![image39](images/image39.png)
 
@@ -1206,7 +1328,7 @@ Bu stream AWS Lambda tarafından okunabilir ve sonrasında;
 * Stream 24 saat data retention süresine sahiptir.
 * Batch size, 6 mb ve 1000 satıra kadar konfigüre edilebilir
 
-##### DynamoDB Streams Kinesis Adapter
+#### DynamoDB Streams Kinesis Adapter
 
 ![image40](images/image40.png)
 
@@ -1214,7 +1336,7 @@ DynamoDB Stream'den doğrudan yararlanmak için KCL library kullanılmalıdır v
 
 Arayüz ve programlama Kinesis Stream ile birebir aynıdır. Bu yöntem AWS Lambda'nın bir alternatifi olarak düşünülebilir.
 
-##### DynamoDB TTL (Time to Live)
+#### DynamoDB TTL (Time to Live)
 
 **TTL:** Bir item'ın expire süresi dolduktan sonra otomatik olarak silinmesidir.
 
@@ -1225,8 +1347,9 @@ Arayüz ve programlama Kinesis Stream ile birebir aynıdır. Bu yöntem AWS Lamb
 * TTL ile silinen itemlar indexlerden de yani GSI/LSI'de de silinirler.
 * DynamoDB Streams, expired olmuş nesnelerin (itemların) kurtarılmasına yardımcı olabilir.
 
-**DynamoDB – Security & Other Features**
-**Security**
+<a name="#dynamodb-security"></a>
+### DynamoDB Security
+
 * VPC endpoints, internet olmadan DynamoDB'ye erişebilir.
 * Erişim IAM tarafından kontrol edilir.
 * KMS ile encryption at rest yani yerinde encryption yapılır.
@@ -1243,6 +1366,7 @@ Amazon Database Migration Service (DMS) kullanılarak; MongoDB, Oracle, MySQL, S
 
 Development ortamı kullanım amacı ile, local bilgisayarlardan, local DynamoDB'ye erişim mümkündür.
 
+<a name="#elastiCache"></a>
 ## AWS ElastiCache
 
 ElastiCache kendi içerisinde Redis ve Memcached olmak üzere iki ayrı çözüm sunar.
@@ -1255,6 +1379,7 @@ Cache'ler yüksek performansi düşük latency sağlayan in-memory veri tabanlar
 * Multi AZ'da çalışabilmesi, failover durumlarına karşı korur.
 * İşletim sistemi bakımı, patch, optimizasyon, kurulum, yapılandırma, monitoring, recovery ve backup işlerini AWS tarafından yapılır.
 
+<a name="#redis"></a>
 ### Redis
 
 Redis in-memory olarak çalışan bir key-value store database'dir.
@@ -1264,6 +1389,7 @@ Redis in-memory olarak çalışan bir key-value store database'dir.
 * Failover durumunda, Cache datanın kaybolmaması için, disaster recover ortamı için Multi AZ kullanılmalıdır.
 * Read Replica desteği vardır.
 
+<a name="#memcached"></a>
 ### Memcached
 
 Memcached bir in-memory object store'dur. Cache reboot sırasında kaybolur.
@@ -1273,8 +1399,10 @@ Genel olarak Redis, Memcached'den daha yetenekli olduğundan, piyasada da daha f
 
 Düşük latency ihtiyacı olan sistemler, modellerinde cache okuma yapıları kullanmaktadırlar ve bu gibi yapılarda Redis, Memcached'den çok daha fazla tercih edilmektedir.
 
+<a name="#processing"></a>
 # Processing
 
+<a name="#lambda"></a>
 ## AWS Lambda
 
 Kod parçacıklarının Cloud ortamında server olmadan ve scale olabilme özelliği olan processing teknolojisidir.
@@ -1289,26 +1417,28 @@ Node.js, Python, Java, C#, Go, Poweshell, Ruby desketlenen dillerdir.
 
 Yukarıda yer alan servisler Lambda trigger'lardır.
 
-#### Lambda + Kinesis
+### Lambda + Kinesis
 
 Lambda kodu batch stream kayıtları ile birlikte bir event alır.
+
 * Trigger ayarlanırken, 10000 kayıda kadar olan bir batch boyutu belirlenebilir.
 * Çok büyük batch size işleri timeout'a neden olabilir.
 * Batch işlemleri aynı zamanda Lambda'nın payload limiti olan 6 mb'a bölünebilir.
 
 Lambda batch işini başarılı tamamlayana kadar veya data expire olana kadar denemeye devam eder.
+
 * Eğer hatalara doğru şekilde müdahale edilmeze, bu shard işlemini durdurabilir.
 * Processing tamamen hatalarla karşılanmadığından emin olmak için daha fazla shard kullanılabilir.
     * Lambda shard verilerini senkronize olarak işler.
 
-
 **Ücretlendirilmesi:**
 Lambda kullanıldığı kadar ödenen bir servistir.
 Ayda 1M request, saniyede 400K gb compute zamanı ücretsizdir.
+
 * 1 milyon request için 0.20 dolar
 * Her 1 gb/sn için .00001667 dolar ile ücretlendirilir.
 
-High availability, unlimited scalability ve yüksek performans sunar. 
+High availability, unlimited scalability ve yüksek performans sunar.
 Timeout max 900 saniyedir.
 
 Lamda'nın datayı process edebilmesi için gerekli IAM policy'e sahip olmasının dışında, onu tetikleyen servis ile de aynı account'da olması gerekmektedir.
@@ -1316,6 +1446,7 @@ Lamda'nın datayı process edebilmesi için gerekli IAM policy'e sahip olmasın�
 Lambda-Kinesis stream yapısı kurulmuş olsun. Lambda, kayıtları kontrol edecek ve kendi fonksiyonu ile processing işini başlatacaktır.
 Bu şekilde kurulan bir yapıda, Lambda Kinesis Stream'i poll ederek yeni aktivite olup olmadığını sorgulayabilir.
 
+<a name="#aws-glue"></a>
 ## AWS Glue
 
 Ana kullanımı, S3'de bulunan Data Lake için merkezi bir metadata repository'si olarak kullanılmasıdır.
@@ -1334,7 +1465,7 @@ Datanın kendisi S3'de tutulur ve glue data catalog sadece diğer servislere bu 
 
 Data bir kere kataloglandıktan sonra, Athena veya EMR gibi toollar için analiz için hazır olacaktır.
 
-##### Glue ve S3 Partition
+### Glue ve S3 Partition
 
 Glue crawler S3'de data nasıl organize edilmiş ise extract işini o şekilde yapar.
 
@@ -1349,7 +1480,7 @@ Glue aynı zamanda Hive ile entegre çalışabilmektedir. Glue data catalog'u, h
 
 Glue data catalog, EMR'da hive'a metadata bilgisi sağlayabilir.
 
-##### Glue ETL
+### Glue ETL
 
 * Serverless çalışır ve otomatik kod generate edebilir.
 * Scala veya Python dil desteği bulunmaktadır.
@@ -1373,14 +1504,15 @@ Glue, DynamoDB gibi NoSQL database desteği bulunmamaktadır.
 
 AWS Glue ile process edilecek olan EC2'de çalışan bir MySQL veri tabanından data load edilmek isteniyor. Böyle bir yapıda instance VPC içerisinde yer alması gerekmektedir.
 
-## EMR (Elastic MapReduce)
+<a name="#aws-emr"></a>
+## AWS EMR (Elastic MapReduce)
 
 EC2 instance'ları üzerinde yönetilen hadoop framework'dür. Spark, HBase, Presto, Flink, Hive ve daha fazlasını bünyesinde içerir.
 EMR Notebooks adında bir feature desteği vardır. EMR Notebooks, EMR clusterındaki verileri küçük bir web browser'dan python kullanarak sorgulamaya olanak sağlayan bir özelliktir.
 
 EMR AWS servisleri ile çeşitli entegrasyon noktaları vardır ve EMR, hadoop clusterının bütün gücünü sağlamaktadır.
 
-**EMR Cluster**
+### EMR Cluster
 
 ![image43](images/image43.png)
 
@@ -1390,9 +1522,10 @@ EMR AWS servisleri ile çeşitli entegrasyon noktaları vardır ve EMR, hadoop c
 
 **Task node,** Task'lar bu node'larda çalışır ama core node gibi data saklamaz. Compute node olarak çalışırlar ve cluster'dan çıkarıldığında risk teşkil etmez. Spor instance'ları kullanılabilir.
 
-**EMR Kullanımı**
+#### EMR Kullanımı
 
 Geçici ve uzun süreli cluster'lar kullanılabilir.
+
 * Geçici kapasite için spot instance mantıklı bir tercih olabilir.
 * Uzun süreli çalışacak cluster'lar için, reserved instance kullanılabilir.
 
@@ -1416,10 +1549,11 @@ Clusterda bulunan node'ları oluşturan instance'lar için EC2 instance kullanı
 HDFS, hadoop için distributed scalable file system'dir.
 
 **EMRFS (EMR File System):** HDFS gibi görünür ancak veriyi S3 üzerinde tutar.
+
 * EMRFS Consistent View: S3 consistency'e opsiyonel olarak kullanılabilir.
 * Consistency'i takip etmek için DynamoDB kullanılabilir.
 
-***S3 kullanıldığı zaman consistency sorunu yaşanabilir!***
+*****S3 kullanıldığı zaman consistency sorunu yaşanabilir!**
 
 Cluster'da bir çok instance varsa ve aynı anda S3'e veri yazmaya ve okumaya çalışırlarsa ve bir node başka bir node'un verilere erişmeye çalıştığı yere yazma işi yapmaya çalışırsa;
 
@@ -1433,9 +1567,13 @@ HDFS için EBS (Elastic Block Storage)
 Çalışan bir cluster'a EBS volume attach edilemez. Çalışır halde olan cluster'a sadece EMS volume eklenebilir.
 
 EMR saatlik olarak ücretlendirilir ve bu ücretin üzerinde kullanılan EC2 instance'ların kullanımı eklenir.
+
 * Core node fail olursa, yeni bir node provision edilir.
 * On the fly Task node eklenip/çıkarılabilir.
 * Çalışan bir cluster'ın core node'ları resize edilebilir.
+
+<a name="#hive-pig-hbase"></a>
+### Hive Metastore, Pig, HBase
 
 #### External Hive Metastore
 
@@ -1488,7 +1626,8 @@ AWS servisleri ile entegre bir mimari tasarlanacak, fully managed bir NoSQL veri
 Her an tutarlı okuma ve yazma ihtiyacı var ise, yüksek write ve update throughput olan bir sistem gereksinimi varsa veya hadoop ile daha entegre bir NoSQL veri tabanı ihtiyacı var ise, HBase tercih edilebilir.
 HBase için EMRFS ile S3'de veri tutulabilir ve S3'de backup tutulabilir.
 
-#### Presto
+<a name="#presto"></a>
+### Presto
 
 Preinstalled olarak gelir.
 
@@ -1507,9 +1646,10 @@ EMR ile processing memory'de yapılır ayrıca stage'ler arasındaki network üz
 
 Bu hız OLTP veya batch processing için yeterli değildir. Presto sadece ekosistemde farklı veri tabanlarında depolanacak datasetler üzerinden anlam çıkarmaya yardımcı olan, OLAP tarzı sorguları çalıştırmamızı sağlayan etkileşimli bir sorgu aracıdır.
 
-#### Zeppelin ve EMR Notebooks
+<a name="#zeppelin-emr"></a>
+### Zeppelin ve EMR Notebooks
 
-##### Zeppelin
+#### Zeppelin
 
 iPython notebook, küçük Python kodları yazmaya olanak sağlayan ve bunun çalışmasını görmemizi sağlayan bir web browser uygulamasıdır.
 
@@ -1519,7 +1659,7 @@ Python kodları ve scriptleri verilere göre etkileşimli olarak çalışmasına
 
 Spark, Python, JDBC, HBase, Elasticsearch ve daha fazlası ile entegre çalışabilir.
 
-#### Zeppelin + Spark
+##### Zeppelin + Spark
 
 ![image45](images/image45.png)
 
@@ -1527,11 +1667,12 @@ Spark shell'de olduğu gibi, interaktif olarak spark kodlarının yazılmasını
 
 SparkSQL ile SQL tipinde sorguları çalıştırabilir ve bu sorgu sonuçları tablo ve grafiklerde görsel bir sonuç sunabilir. Bu şekilde Spark'ı daha fazla bir data scientist aracı olarak kullanılması sağlanır.
 
-#### EMR Notebooks
+##### EMR Notebooks
 
 ![image46](images/image46.png)
 
 Zeppelin ile benzer bir uygulamadır ama daha fazla AWS entegrasyonu sunar.
+
 * S3'de backup'ı bulunan notebook gibidir.
 * VPC içerisinde tutulur ve sadece AWS console'dan erişim mümkün olabilir.
 * EMR müşterileri için ek bir ödeme alınmaz.
@@ -1539,7 +1680,10 @@ Zeppelin ile benzer bir uygulamadır ama daha fazla AWS entegrasyonu sunar.
 * Versiyon kontrolü yapmak amacı ile repository ile entegre çalışmaktadır.
 * Kerberos enable olan bir EMR clusterına, kişisel notebook attach edilemez.
 
-### Hue
+<a name="#hue-splunk-flume"></a>
+### Hue, Splunk ve Flume
+
+#### Hue
 
 Hadoop user experineces.
 
@@ -1548,7 +1692,7 @@ IAM engegrasyonu sunmaktadır ve böylece Hue kullanıcılarının neye erişebi
 
 HDFS veya EMRFS ve S3 arasında veri taramasına ve taşımasına olanacak sağlar.
 
-### Splunk
+#### Splunk
 
 ![image47](images/image47.png)
 
@@ -1560,18 +1704,22 @@ Splunk aynı zamanda log analizi ve bu logların yorumlanması konusunda da yard
 
 Örnek verecek olursak, 100 node olan bir cluster'da bütün logları incelemek ve bir sorunu analiz etmek oldukça zordur. Splunk yardımı ile bu logları tek bir merkezde toplanarak, Splunk query adı verilen bir arama metodu ile bunlar üzerinden analiz yapılabilir.
 
-### Flume
+#### Flume
+
 Sqoop gibi veri transferi konusunda kullanılır ancak Flume log verilerinde çok başarılıdır ve cluster içerisinde bu tip veriler üzerinde stream işletebilir ve aggregation yapabilir.
 
-### MXNet
+<a name="#diger"></a>
+### Diğer Servisler
+
+#### MXNet
+
 Deep learning uygulamalar tasarlamak için kullanılan bir framework'dür ve kolayca EMR cluster'da distribute olabilir.
 
-### S3DistCP
+#### S3DistCP
+
 HDFS ve S3 arasında çok büyük verilerin kopyalanmasını sağlar. Bu işi yaparken arka planlda MapReduce işi çalıştırır ve fazla sayıda objenin parallel kopyalanmasına olanacak sağlar.
 
 Bu işlemi farklı bucket, cluster ve account'lar arasında da yapabilmektedir.
-
-### Diğer EMR/Hadoop Araçları
 
 * **Ganglia,** Monitoring
 * **Mahout**, Machine Learning (recommendation engine/collaborative filtering yeteneğine sahiptir.)
@@ -1584,16 +1732,18 @@ Bu işlemi farklı bucket, cluster ve account'lar arasında da yapabilmektedir.
 
 Kısacası Cloudera, Hortonworks ve AWS yazılımlarının hemen hemen hepsinin kullanılmasına olanak vardır.
 
-##### EMR Security
+<a name="#emr-security"></a>
+### EMR Security
+
 IAM policy, Kerberos, SSH ve IAM rolleri security kısmında kullanılmaktadır.
 
-##### EMR: Instance Seçimi
+#### EMR: Instance Seçimi
 
-**Master node**
+##### Master node
 
 * 50 node üzerinde bir cluster olacak ise, m4.large daha düşük node'a sahip cluster için m4.xlarge
 
-**Core&Task node**
+##### Core & Task node
 
 * Genel kullanım için m4.large kullanılabilir.
 * Cluster web crawler gibi external dependencies'e sahipse, t2.medium
@@ -1602,7 +1752,7 @@ IAM policy, Kerberos, SSH ve IAM rolleri security kısmında kullanılmaktadır.
 * Database, memory caching uygulamalar için, yüksek memory instancelar
 * ML ve NLP gibi Network/CPU gereksinimi için, cluster computer instance'lar
 
-**Spot Instance:**
+##### Spot Instance
 
 * Task nodelar için tercih edilebilir. Kritik olmayan, test amaçlı işler koşturulacak ise uygun olabilir. Production ortam için kesinlikle önerilmez.
 
@@ -1610,6 +1760,7 @@ EMR cluster terminate edilirse, EMR'a ait olan volume'larda silinecektir.
 
 Amazon; EMR cluster'larında, **Master ve Core node olarak reserved veya on-demand instance** tavsiye etmektedir. Performansı arttırmek ve maaliyeti düşürmek için **Task node olarak da Spot instance** tavsiye etmektedir.
 
+<a name="#machine-learning"></a>
 ## Machine Learning
 
 ### Machine Learning 101
@@ -1617,6 +1768,7 @@ Amazon; EMR cluster'larında, **Master ve Core node olarak reserved veya on-dema
 Machine Learning sistemleri, genel olarak bir item'ın yani öğenin bilinmeyen bir özelliğini tahmin eder.
 
 **Örnek:**
+
 * Bir evin ne kadara satılabileceği?
 * Bir resmin ne resmi olduğu?
 * Bir biyopsu sonucunun iyi mi yoksa kötü huylu mu olduğu?
@@ -1667,7 +1819,7 @@ Mahout, recommendation engine/collaborative filtering yeteneğine sahiptir.
 
 Bu gibi bir çözümde Amazon Machine Learnning iyi bir çözüm değildir çünkü Amazon ML 100 kategorik recommendation ile sınırlıdır.
 
-##### Amazon ML'de Veri Tipleri
+#### Amazon ML'de Veri Tipleri
 
 Sadece belli bir kaç model desteği vardır ve onlar da aşağıdaki gibidir.
 
@@ -1713,13 +1865,15 @@ Bir modelin başarısı verininin ne kadar temiz olduğu ve ne kadar iyi hazırl
 Buna ek olarak ayrıca ML modellerinin ne kadar iyi ayarlanmasına da bağlıdır ve buna hyperparameters tuning denir.
 
 Amazon ML'de aşağıdaki parametreler bulunmaktadır.
+
 * Learning rate, bir yinelemeden diğerine ne kadar hızlı hareket ettiğidir. 
 * Model size
 * Number of passes, olası veya iyi bir cevabı yakınsamaya çalışırken geçme sayısıdır.
 * Data shuffling, verilerin karıştırıp karştırılmamasıdır.
 * Regularization, Verileri girdikçe ortak değer kümesine ölçeklendirmektir.
 
-### Amazon Machine Learning (ML)
+<a name="#amazonml"></a>
+### Amazon Machine Learning
 
 Amazon ML, model oluşturmayı kolaylaştırmak için kod yazmaya gerek olmadan görselleştirme araçları sunar.
 
@@ -1749,6 +1903,7 @@ EMR/Spark bir alternatif olabilir.
 
 Nisan 2019'dan itibaren Amazon artık yeni hesapların ML servisini kullanmasına izin vermiyor ve kullanıcıları SageMaker ve diğer ML hizmetlerine yönlendiriyorlar.
 
+<a name="#sagemaker"></a>
 ### Amazon SageMaker
 
 Scalable, Amazon tarafından fully-managed bir ML servisidir.
@@ -1814,7 +1969,10 @@ Temel olarak; çok güçlü bir ML framework'dür, fully-managed bir hizmettir, 
 
 **SageMaker Neo:** ML modelini bir kere train ederek, Cloud’da herhangi bir yerde çalıştırılmasına olanak verir.
 
-### Deep Learning 101 ve AWS Best Practices
+<a name="#amazonml"></a>
+### Deep Learning
+
+#### Deep Learning 101 ve AWS Best Practices
 
 Deep learning farklı alanlardaki ihtiyaçlara göre uygulanabilmektedir. 
 Örnek olarak, temel sinir ağı yani nöral ağ türlerini ve deep learning arasındaki bağlantıyı örnek verebiliriz.
@@ -1866,6 +2024,7 @@ Deep learning için tavsiye edilen instace tipleri,
 * P2: 16 K80 GPU’s
 * G3: 4 M60 GPU’s
 
+<a name="#data-pipeline"></a>
 ## AWS Data Pipeline
 
 ![image51](images/image51.png)
@@ -1889,8 +2048,10 @@ Verilen örnek son derece basit bir örnektir ve bu planlama ortamını çok dah
 * Highly available'dır.
 * EMR, Hive, Copy, SQL sorguları yazabilme, command line script yapılabilecek aktivitelerdir.
 
+<a name="#analysis"></a>
 # Analysis
 
+<a name="#kinesis-analytics"></a>
 ## Kinesis Analytics (Querying streams of data)
 
 Spark streaming'e benzer olan ve stream datayı sorgulamak için kullanılan başka bir sistemdir ve sadece AWS Kinesis spesifiktir.
@@ -1931,7 +2092,8 @@ Schema discovery özelliği bulunmaktadır.
 
 Kinesis Data Analytics, Kinesis Processing Units (KPU) şeklinde kapasite arar. Tek bir KPU 4 gb karşılık gelir. Uygulama için default KPU limit 8'dir yani 32 gb'dır.
 
-## Elasticsearch Service
+<a name="#elasticsearch"></a>
+## Elasticsearch
 
 Petabyte mertebesinde ölçeklendirme, analiz yapabilme ve raporlama yapmamıza yardımcı olur.
 
@@ -1954,7 +2116,8 @@ Aynı zamanda bir data pipeline'dır ve bunun için verilerin Elasticsearch'e g�
 
 Elastic Stack, Beats adında daha büyük bir paketin parçası olan ve temel olarak Elasticsearch cluster farklı kaynaklardan gelen verileri import etmemize olanak tanıyan bir framework olan LogStash adı verilen kendi yazılımı vardır.
 
-## Kibana
+<a name="#kibana"></a>
+### Kibana
 
 ![image53](images/image53.png)
 
@@ -1990,6 +2153,7 @@ Her doküman, belli bir shard'a hashed edilir yani karıştırılır ve her shar
 
 Okuma requestleri hep primary hem de replikalara yönlendirilebilr böylece okuma throughputlarının artması sağlanabilir.
 
+<a name="#aws-elasticsearch"></a>
 ### Amazon Elasticsearch Service
 
 Serverless değildir yani servis için kaç tane server kullanılacağına aynı EMR'da olduğu gibi karar verilmedir. Ancak AWS tarafından fully-managed'dır.
@@ -2032,13 +2196,14 @@ Nginx, EC2 sunucusunda çalışabilen, request'i VPC'de bulunan Elasticsearch'e 
 
 Bir diğer çözüm, Kibana'nın dinlediği 5601 portunu ssh'a açılabilr.
 
-**Amazon ElasticSearch**
+#### Notlar
 
 * Öncelik olarak search ve analiz için tercih edilmelidir.
 * OLTP sistemler için uygun değildir bu gibi bir ihtiyaç için RDS veya DynamoDB tercih edilmelidir.
 * Ad-hoc data query için uygun değildir bu gibi bir ihtiyaç için Athena tercih edilmelidir.
 
-## Amazon Athena
+<a name="#athena"></a>
+### Amazon Athena
 
 S3'de bulunan veriyi herhangi bir başka ortama göndermeye gerek olmadan, serverless şekilde doğrudan SQL sorgusu çalıştırmamızı sağlar.
 
@@ -2066,7 +2231,8 @@ ODBC ve JDBC arayüzleri de bulunmaktadır. Bunun sayesinde QuickSight dahil olm
 
 **Kompleks SQL sorgulamaları için Athena tavsiye edilmez. Böyle bir ihtiyaç için Redshift daha uygun olacaktır. Redshift, karmaşık SQL sorgularını çalıştırma yeteneğine sahiptir.**
 
-## Amazon + Glue
+<a name="#athena-glue"></a>
+#### Athena + Glue
 
 S3'de bulunan veriler için, Glue data catalog populate eden bir Glue crawler olduğunu düşünelim.
 
@@ -2105,7 +2271,8 @@ Athena ile S3 arasında da TLS kullanılarak in-transit encryption yapılabilir.
 Formatlanmış raporlar ve visualization için uygun değildir. Bu gibi bir ihtiyaç için QuickSight tercih edilmelidir.
 ETL extract işleri için de tavsiye edilmez. Glue kullanmak veya Apache Spark kullanmak daha doğru bir tercih olacaktır.
 
-## Amazon Redshift
+<a name="#redshift"></a>
+## Redshift
 
 AWS'in distributed petabyte mertebesinde DWH çözümüdür. Server bakımı AWS tarafından yapıldığından, cluster yönetimi ile kullanıcının ilgilenmesine gerek olmamaktadır.
 
@@ -2155,6 +2322,7 @@ Bu iki tip de, Extra large XL ve 8XL  olmak üzere iki ayrı boyut olarak seçil
 Extra large XL,  toplam 2Tb magnetic storage'a sahip 3HDD bulundurur.
 8XL, toplam 16Tb magnetic storage'a sahip 23 sabit sürücüsü bulunmaktadır.
 
+<a name="#redshift-spectrum"></a>
 ### Redshift Spectrum
 
 Spectrum, exabyte seviyesinde query çalıştırılmasına olanak sağlar.
@@ -2192,7 +2360,8 @@ Redshift tek bir AZ kullanımı ile sınırlıdır. Bu nedenle herhangi bir AZ a
 
 Snapshot ile, aynı region'da bulunan başka bir AZ cluster restore edilebilir.
 
-### ***Redshift Distribution Tipleri
+<a name="#redshift-distribution"></a>
+### Redshift Distribution Tipleri
 
 Redshift'de tabloların verilerinin dağılımı için birden fazla seçenek mevcuttur. Redshift'de tablo oluştururken, data bu seçime bağlı olarak dağıtılmaktadır.
 
@@ -2210,7 +2379,8 @@ Belli bir kolona dair sorgulama yapılacak ise Key distribution seçilmelidir.
 
 Update ve birden fazla tabloya insert işleri uzun sürer. ALL distribution hız gereksinimi olmayan, çok fazla update görmeyen, küçük dimension tablolar için uygun olabilir.
 
-#### Redshift Sort Keys
+<a name="#redshift-sort-keys"></a>
+### Redshift Sort Keys
 
 Satırlar, sort key olarak belirlenen kolon veya kolonlara bağlı olarak sıralı olarak tutulur.
 
@@ -2227,9 +2397,10 @@ Index gibi çalışır ve aynı zamanda range tipinde sorguların daha hızlı o
 
 Aynı RedShift cluster'ında bulunan bir tabloyu birden fazla ekip farklı şekilde sorgu çalıştırarak kullanıyorsa, performansı arttırmak için her takım için interleaved sort key eklenebilir.
 
-#### Redshift Data Flows
+<a name="#redshift-data-flow"></a>
+### Redshift Data Flows
 
-**Importing/Exporting data**
+##### Importing/Exporting data
 
 **Copy:**
 Copy komutu ile aynı anda birden fazla data dosyası veya birden fazla data stream okunabilir.
@@ -2250,20 +2421,24 @@ Cluster ile VPC arasındaki repository arasında tüm copy ve unload trafiğinin
 Bunun için VPC endpoint, Net Gateway veya Internet Gateway gerekmektedir.
 
 *****Redshift'den snapshot alarak otomatik olarak başka region'a göndermek isteyelim.**
+
 * KMS-encrypted Redshift cluster var ve buna ait snapshot olsun.
 * Backup amacı ile bu snapshot bir başka region'a gönderilmek istensin.
 
 **Hedef AWS region'da,**
+
 * KMS key yok ise bir tane oluşturulmalı,
 * Copy yetkisi için unique bir ad belirlenmelidir.
 * Belirlenen Copy yetkisi için, KMS key ID belirlenmelidir.
 
 **Source region'da,**
-*	Oluşturulan copy yetkisi ile snaphsot kopyalama işi enable edilmelidir.
+
+* Oluşturulan copy yetkisi ile snaphsot kopyalama işi enable edilmelidir.
 
 **DBLink:** Redshift ve PostgreSQL arasında bağlantı sağlar ve bu iki sistem arasında copy ve sync işleri için uygundur.
 
-#### Redshift Diğer servislerle olan entegrasyonu:
+<a name="#redshift-entegration"></a>
+### Diğer Servislerle Entegrasyonu
 
 **S3:** Redshift'den parallel processing ile data export edilerek, S3'de bulunan birden fazla dosyaya gönderilebilir. 
 S3'de bulunan data, Redshift'e import'da edilebilir.
@@ -2302,6 +2477,7 @@ https://docs.aws.amazon.com/redshift/latest/mgmt/managing-snapshots-console.html
 
 **Redshift Enhanced VPC Routing:** Redshift Enhanced VPC Routing kullanıldığı zaman; Redshift, data repository ve cluster arasındaki bütün copy ve unload trafiğini VPC üzerinden yapacaktır. Enhanced VPC Routing enable değil ise AWS network içerisindeki trafik de dahil olmak üzere, akış trafiğini internet üzerinden yönlendirir.
 
+<a name="#amazon-rds"></a>
 ## Amazon RDS (Relational Database Service)
 
 ![image57](images/image57.png)
@@ -2353,7 +2529,7 @@ Spark, Hive ve Presto için merkezi bir metastore ve birden fazla cluster'dan er
         * By default, degisiklikler bir sonraki maintenance zamaninda olur ama istenirse, force an immediate yapilabilir.
 * Multi-AZ’da, synchronous replikasyon yapılmaktadır.
 
-##### DB Automated Backups
+### DB Automated Backups
 
 * AWS Auto backup alinirken, verinin de sağlıklı olup olmamasini kontrol eder.
 * Backup'lar S3'de tutulur.
@@ -2367,7 +2543,7 @@ Spark, Hive ve Presto için merkezi bir metastore ve birden fazla cluster'dan er
 * Automated backup'lar, MySQL icin sadece InnoDB storage engine destekler. ISAM'da dahil olmak üzere, diğerlerinde beklenmeyen sonuçlar doğurabilir.
 * Backup'lar direk share edilemez ama kopyasi alinarak paylasilabilir.
 
-##### Manual Backups
+### Manual Backups
 
 * Point-in-time recovery için kullanılamaz.
 * RDS silinirse, manual backup'lar silinmez.
@@ -2379,7 +2555,7 @@ Spark, Hive ve Presto için merkezi bir metastore ve birden fazla cluster'dan er
 * Restore sonrasi, RDS endpoint'de degisir. Uygulama bunun üzerinden çalışıyorsa, güncellenmelidir.
 * Restore sürecinde, storage tipi de değişebilir. (General purpose, Provisioned IOPS, Magnetic)
 
-##### RDS DB Security and Encryption
+### RDS DB Security and Encryption
 
 * Mevcut un-ecrypted DB instance'ı, encrypt edilemez.
     * Yeni bir ecrypted DB oluşturulup, un-ecrypted data'yi migrate edebiliriz.
@@ -2402,7 +2578,7 @@ SSL kullanarak SQL Server instance'a bağlanmanın iki yolu vardır.
 
 Belirli bir connection bağlantısını encrypt etmek için de, Client için RDS Root CA sertifikası alarak, sertifikanın server'a import edilmesi gerekiyor ve uygulamanın da konfigüre edilerek, RDS'e bağlantının SSL olmasını sağlayabiliriz.
 
-##### RDS Faturalama
+### RDS Faturalama
 
 * Saat başına DB instance kullanımı (hem Primary hem de Standby için)
 * Storage GB/mo.
@@ -2420,7 +2596,7 @@ Belirli bir connection bağlantısını encrypt etmek için de, Client için RDS
     * Her account için 1 yıllık 750 micro instance hours/months
     * Oracle için BYOL (BringYourOwnLicenses) veya License included gereklidir.
 
-#### Read Replicas
+### Read Replicas
 
 * I/O kapasitesin dolması ve daha fazla I/O ihtiyacı gereksinimi olduğundan kullanışlı olabilir.
 * Read replica, Primary RDS instance'ın sadece okuma için kullanılan replicasıdır.
@@ -2450,14 +2626,14 @@ Belirli bir connection bağlantısını encrypt etmek için de, Client için RDS
 
 ![image58](images/image58.png)
 
+### RDS Scaling
 
-#### RDS Scaling
 * Compute ve Storage size arttırılabilir ancak azaltılamaz.
     * Storage scaling online yaplılabilir ancak bazı performans sorunlarına neden olabilir.
     * Compute scaling downtime'a neden olabilir.
 * Storage type MS SQLServer dışında değiştirilebilir.
 
-**Sınav Sorularından Notlar:**
+#### Sınav Sorularından Notlar
 
 * Elasticache sık sık okunan verileri cache'e alarak, okuma yükünün azalmasını sağlayabilir.
 * Synchronous replication sadece aynı region'da olabilir. Farklı region'larda support edilmez. Farklı region'lar için, DR çözümleri Asyncronous replica olabilir.
@@ -2466,7 +2642,7 @@ Belirli bir connection bağlantısını encrypt etmek için de, Client için RDS
 * Backup window değiştirilirse, etkisini hemen gerçekleşir.
 * Backup, Prod RDS'den alınırsa, bir kaç dk için I/O operasyonları suspend olabilir.
 
-#### Amazon RDS CloudWatch Enhanced Monitoring.
+### Amazon RDS CloudWatch Enhanced Monitoring
 
 CloudWatch, DB instance için metricleri hypervisor’dan alır. Enhanced monitoring ise instance’daki agent’dan alır. Bu iki sonuç aynı olmayacaktır çünkü hypervisor katmanı daha az miktarda veri barındırır bu nedenle enhanced monitoring daha avantajlıdır.
 
@@ -2474,9 +2650,13 @@ Spesifik bir process için ne kadar cpu ve memory kullandığını öğrenmek is
 
 MariaDB, Microsoft SQL Server, MySQL version 5.5 veya sonrası, Oracle, PostgreSQL database’leri için geçerlidir. RDS child process ve OS process bilgilerini toplayabilir.
 
+<a name="#visualization"></a>
 # Visualization
 
-QuickSight Visual Types
+<a name="#quicksight"></a>
+## Amazon Quicksight
+
+### QuickSight Visual Types
 
 ![image59](images/image59.png)
 
@@ -2495,7 +2675,7 @@ Scatter Plots;  korelasyon ve dağılım grafikleri için kullanılmaktadır.
 
 ![image62](images/image62.png)
 
-Heat maps; 3 boyutlu veriye örnektir. Yanda bulunan heat map, hangi genin hangi şartlar altında olduğunu gösterir ve belirli bir gen ifadesini genel üzerinde yorumlamayı sağlar. 
+Heat maps; 3 boyutlu veriye örnektir. Yanda bulunan heat map, hangi genin hangi şartlar altında olduğunu gösterir ve belirli bir gen ifadesini genel üzerinde yorumlamayı sağlar.
 
 Örnek olarak, sol üst köşeye dahil olan gen için bazı şeylerin farklı olduğu görünüyor.
 
@@ -2513,14 +2693,16 @@ Stories, farklı dashboard'lar veya grafikler kullanarak slide show hazırlamak 
 **Pie graphs:** tree maps: aggregation yani toplama için kullanılır.
 **Pivot tables:** Tablo veriler için kullanılır.
 
-##### Alternatif Görselleştirme Araçları
+#### Alternatif Görselleştirme Araçları
 
 * Web tabanlı olanlara örnek olarak; D3.js, Chart.js, Highchart.js örnek verilebilir.
     * **D3.js:** Datayı referans alarak, dökümanları düzenlemek için kullanılan bir JavaScript kütüphanesidir. **HTML, SVG ve CSS kullanmaktadır.** Görselleştirme bileşenlerini ve DOM manipülasyonuna veri odaklı bir yaklaşım ile, modern tarayıcıların tüm özelliklerini sunar.
 * Business Intelligence örnek olarak da; tableau ve MicroStrategy örnek verilebilir.
 
+<a name="#security"></a>
 # Security
 
+<a name="#encryption-101"></a>
 ## Encryption 101
 
 **Encryption in flight:** Veri gönderilmeden önce encrypt edilir ve alınmadan önce de decrypted edilir.
@@ -2552,6 +2734,7 @@ Data client tarafından encrypt edilir ve hiç bir zaman server tarafından decr
 
 Best practice olarak da, server asla verileri decrypted edememesi lazım. Bunun için Envelope Encryption'dan faydalanılabilir.
 
+<a name="#aws-kms"></a>
 ## AWS KMS (Key Management Service)
 
 AWS servislerinin, encyption key'lerini yöneten servistir ve veriye erişimin kontrol altında tutulmasının en kolay yoludur.
@@ -2596,7 +2779,8 @@ Decrypt işlemi KMS olmadan asla yapılamaz. Bunun için KMS erişimi olan CMK o
 
 AWS servislerinden S3 hariç, hepsinde encrypt olmayan bir storage'da encyption yapılacak ise, encrypt backup veya snapshot alınmalı ve bununla migration yapılmalıdır. S3 için ise encryption'ı enable etmek yeterlidir ve bu işlemden sonra on the fly encryption gerçekleşecektir.
 
-### Cloud HSM (Hardware Security Module)
+<a name="#cloud-hsm"></a>
+## Cloud HSM (Hardware Security Module)
 
 ![image67](images/image67.png)
 
@@ -2615,9 +2799,12 @@ Bu servisin ücretsiz sürümü yoktur ve HSM isteniyorsa, CloudHSM Client Softw
 Kurumsal HSM var ise ve AWS Redshift kullanılıyorsa, Redshift Cluster’ı, VPN bağlantısı ile kurumsal HSM ile de uygun maaliyet ile entegre olabilir.  
 ![image68](images/image68.png)
 
-#### Security - Kinesis
+<a name="#security-aws-services"></a>
+## Security AWS Services
 
-**Kinesis Data Streams**
+### Security - Kinesis
+
+#### Kinesis Data Streams
 
 * In flight encrytion yapmak için https protoklü kullanan SSL endpoint kullanmaktadır.
 * AWS KMS, server-side encryption sağlamaktadır.
@@ -2627,17 +2814,17 @@ Kurumsal HSM var ise ve AWS Redshift kullanılıyorsa, Redshift Cluster’ı, VP
 
 ![image69](images/image69.png)
 
-**Kinesis Data Firehose**
+#### Kinesis Data Firehose
 
 * IAM rolllerinin eklenmesi ile; S3, Elasticsearch, Redshift ve Splunk'a data gönderilebilir.
 * Deliver yani veri gönderme sürecini KMS ile encrypt edebilir.
 * VPC endpoint ve private link support etmektedir.
 
-**Kinesis Data Analytics**
+#### Kinesis Data Analytics
 
 * IAM rolü eklenmesi ile, Kinesis Data Stream ve referans kaynaklardan okuma yapabilir ve Kinesis Data Firehose gibi hedef noktaralara datayı yazabilir.
 
-#### Security - SQS
+### Security - SQS
 
 * In flight encryption için HTTPS endpoint kullanmaktadır.
 * Server side encryption için KMS
@@ -2645,14 +2832,14 @@ Kurumsal HSM var ise ve AWS Redshift kullanılıyorsa, Redshift Cluster’ı, VP
 * SQS queue access policies kullanarak, kullanıcıların SQS servisine erişebilmeleri için 2nd level security de sağlanabilir.
 * Client-side encyption manual olarak uygulanmalıdır.
 
-#### Security – AWS IoT
+### Security – AWS IoT
 
 **AWS IoT policies**
 
 * Cihazlara X.509 sertifikası veya Cognito identities oluşturulmalıdır ve IoT policies kullanarak, istenildiği zaman istenilen cihaz iptal edilebilir.
 * IoT policyleri, IAM policy gibi JSON belgeleridir ve gruplar eklenebilir. Böylece bir şeyler gruplandırılabilir ve tekli policy yerine grup policyleri kullanılabilir.
 
-**Security – DynamoDB**
+### Security – DynamoDB
 
 * TLS (https) ile daata in transit encrypted'dır.
 DynamoDB, at rest encrypted da olabilir.
@@ -2661,7 +2848,7 @@ DynamoDB, at rest encrypted da olabilir.
 * EC2 instance'larının, DynamoDB'ye erişmesini sağlayan VPC endpoint bulunmaktadır.
 * RDS gibi kullanıcıların database içerisinde oluşturulmasına gerek yoktur. DynamoDB bütün güvenliği IAM üzerinde yapılmaktadır.
 
-#### Security - RDS
+### Security - RDS
 
 * VPC security katmanı, network izolasyonunu sağlamaktadır.
 * Security grupları DB instance'ına olan erişimleri kontrol etmektedir.
@@ -2672,7 +2859,7 @@ DynamoDB, at rest encrypted da olabilir.
 * MsSQL Server ve Oracle TDE (Transparent Data Encryption) desteklemektedirler ve encrption tipi ile veriler üzerinde en bir encrption daha oluşturulabilmektedir.
 * CloudHSM ile at rest encrption, RDS'de bulunmamaktadır.
 
-#### Security - Aurora
+### Security - Aurora
 
 * Güvenlik katmanı RDS ile çok benzerdir.
 * VPC security katmanı, network izolasyonunu sağlamaktadır.
@@ -2683,7 +2870,7 @@ DynamoDB, at rest encrypted da olabilir.
 * Database içerisindeki user yetkilendirme, veri tabanının kendi içerisinde yapılmalıdır.
 * Aurora şu anlık sadece PosgreSQL ve MySQL desteği sunmaktadır.
 
-#### Security - Lambda
+### Security - Lambda
 
 * IAM rolleri, her Lambda fonksiyonu için ayrı ayrı attach olmaktadır.
     * Fonksiyon içerisinde source ve targer tanımı yapılmaktadır ve IAM rollleri ile source-target arasında nelerin yapılabileceği bu rolller ile kontrol edilebilmektedir.
@@ -2692,7 +2879,7 @@ DynamoDB, at rest encrypted da olabilir.
 * Private resource'lara erişim için VPC deploy edilebilmektedir.
 * CloudWatch entegrasyonu bulunmaktadır.
 
-#### Security - Glue
+### Security - Glue
 
 * Glue servisleri için IAM policies kullanılabilmektedir.
 * Glue JDBC yapılandırılması sadece SSL ile yapılmaktadır.
@@ -2702,13 +2889,12 @@ DynamoDB, at rest encrypted da olabilir.
     * CloudWatch encrption mode
     * Jon bookmark encrption mode ile yazılabilmektedir.
 
-#### Security - EMR***
+### Security - EMR***
 
 * SSH için, EC2 key pair kullanılmaktadır.
 * EC2 instance'a attach edilen IAM rollleri ile uygun S3 erişimleri, EMRFS requestleri ve Hive ile DynamoDB scan işlemleri sağlanmaktadır.
 * EC2 security grupları kullanılmaktadır ve bu tanım yapılırken, 1 tanım master node için ve bir başka tanımda core veya task node olan cluster node'u içindir.
 * Encryption at rest için, EBS encrption, HDFS encrption veya S3 için de LUKS + EMRFS kullanılanilmektedir.
-    * **Not:** HDFS, S3'den daha pahalıdır.
 * **LUKS sadece EMR içidir. Redshift'de kullanılmaz.**
 
 EMR un-encrypted verilere izin vermemektedir. Map Reduce, Spark, EMRFS veya herhangi bir SSL endpoint işleri için, SSL kullanarak, In-transit encrption sağlanabilir.
@@ -2722,7 +2908,7 @@ In-transit encryption; node to node iletişim, EMRFS ve TLS için kullanılmakta
 
 https://aws.amazon.com/tr/blogs/big-data/best-practices-for-securing-amazon-emr/
 
-#### Security – ElasticSearch Service
+### Security – ElasticSearch Service
 
 * VPC security katmanı, network izolasyonunu sağlamaktadır.
 * ElasticSearch policy ile ileri düzeyde security yönetimi sağlanabilir.
@@ -2730,7 +2916,7 @@ https://aws.amazon.com/tr/blogs/big-data/best-practices-for-securing-amazon-emr/
 * IAM veya Cognito based authentication kullanılabilir.
 * Cognito, end-user'ın SAML kullanan Active Directory gibi identity provider yani kimlik sağlayacı aracaılığı ile Kibana'da oturum açmasına izin vermektedir.
 
-#### Security - Redshift ***
+### Security - Redshift ***
 
 * VPC security katmanı, network izolasyonunu sağlamaktadır.
 * Cluster security grupları bulunmaktadır.
@@ -2741,7 +2927,7 @@ https://aws.amazon.com/tr/blogs/big-data/best-practices-for-securing-amazon-emr/
     * Copy veya Unload komutu kullanılabilir veya alternatif olarak; SQL ifadelerine, access key veya secret key bilgileri yapıştırılabilir.
 * Redshift, S3'ten okuma yaparken veya yazarken de bunlardan yararlanacaktır.
 
-#### Security - Athena
+### Security - Athena
 
 Servis erişimi için IAM policies kullanılmaktadır.
 
@@ -2750,14 +2936,14 @@ Servis erişimi için IAM policies kullanılmaktadır.
 * In-transit encrption için Athena, S3 ve JDBC bağlantı arasında TLS kullanılmaktadır.
 * AWS Glue Catalog ile FGA kullanarak, Athena'da kimin ne yapabileceği kontrol altında tutulabilir.
 
-#### Security - Quicksight
+### Security - Quicksight
 
 * Standart edition için, IAM userları ve email bazlı kullanıcılar kullanılır.
 * Enterprise edition için; Active Directory, Federated login, Multi Factor Authentication, encrption at rest 
 * Spice için şifreleme yapılabimektedir.
 * Ayrıca hangi kullanıcının hangi satırı görebileceğini belirlenebileceği, Row Level Security'de kullanılabilmektedir.
 
-#### AWS STS – Security Token Service
+### AWS STS – Security Token Service
 
 * Geçici olarak sınırlı yetki alarak AWS kaynaklarına erişimi sağlar.
 * Alınan token en fazla 1 saat olacak şekilde geçerli olur ve sonrasında refresh edilmelidir.
@@ -2772,7 +2958,8 @@ Servis erişimi için IAM policies kullanılmaktadır.
 
 Cognito gibi third party provider'lar ile federation'da sağlanabilir. Genelde Web ve mobil uygulamalarda kullanılır.
 
-#### Cross Account Access
+<a name="#sts"></a>
+## STS ve Cross Account Access
 
 ![image70](images/image70.png)
 
@@ -2782,7 +2969,10 @@ Cognito gibi third party provider'lar ile federation'da sağlanabilir. Genelde W
 * Credential yani kimlik bilgilerini alınır ve alınan credential ile, IAM rolünü kişileştirmek için (AssumeRoleAPI) AWS STS (Security Token Service) kullanılır.
 * Geçici credential 15 dakika ve 1 saat aralığında geçerli olacaktır.
 
-#### Identity Federation
+<a name="#identity-saml-federation"></a>
+## Identity ve SAML Federation
+
+### Identity Federation
 
 Bir account başına 5000 IAM user sınırı vardır. Yani Netflix gibi AWS ortamında çalışan şirketler, bütün müşterilerinin bağlanması için onlara IAM user vermezler.
 
@@ -2797,13 +2987,13 @@ Yukarıda görüldüğü gibi kullanıcı Cognito gibi AWS ile arasında trust i
 Aldığı bu credential ile Console veya API ile AWS servislerine erişebilir.
 Bu 3rd party authentication; LDAP, Microsoft AD (~= SAML), Single Sign On, Open ID veya Cognito olabilir.
 
-#### SAML Federation
+### SAML Federation
 
 Büyük kuruluşlar genelde Microsoft AD veya SAML 2.0 uyumluluğu olan bir kullanıcı Identity Provider kullanırlar. 
 
 Bu providerlar AWS ile trust bir ilişki içerisindedirler ve bu sayede kayıtlı olan kullanıcıların hepsi, onlara uygun rolller atanarak, AWS servislerine CLI veya console'a erişmeleri sağlanır ve her kullanıcı için bir tane IAM user oluşturulmasına da gerek kalmaz.
 
-##### CLI based access
+#### CLI based access
 
 ![image72](images/image72.png)
 
@@ -2816,7 +3006,7 @@ Organizasyon içerisinde bulunan bir client uygulaması olduğunu varsayalım.
 1. STS bu talebi kabul edecek ve SAML assertion karşışığında bir token verecek.
 1. Bu token ile oturum açılmış ve CLI based access sağlamış olacak.
 
-##### Console based access
+#### Console based access
 
 ![image73](images/image73.png)
 
@@ -2856,12 +3046,14 @@ Bu IdP tarafından doğrulanacak ve data sonra IdP STS'den kimlik bilgilerini al
 
 Bu credential ile doğrudan S3 bucket'a erişebilir ve istenilen call'lar yapılabilir.
 
-**Policies:**
+<a name="#policies"></a>
+## Policies
+
 https://docs.aws.amazon.com/en_us/IAM/latest/UserGuide/reference_policies_variables.html
 
 https://docs.aws.amazon.com/en_us/IAM/latest/UserGuide/reference_policies_iam-condition-keys.html
 
-**Örnek olarak,** aşağıdaki policy kullanıcıların amazon.com üzerinde federated yapmasına, kullanıcı adlarından sonra adlandırılmış bir bucket'dan download/upload izni verir.
+**Örnek:** aşağıdaki policy kullanıcıların amazon.com üzerinde federated yapmasına, kullanıcı adlarından sonra adlandırılmış bir bucket'dan download/upload izni verir.
 
 ```javascript
 {
@@ -2885,7 +3077,8 @@ https://docs.aws.amazon.com/en_us/AmazonS3/latest/dev/example-bucket-policies.ht
 **DynamoDB Advanced Policies**
 https://docs.aws.amazon.com/en_us/amazondynamodb/latest/developerguide/specifying-conditions.html
 
-#### AWS CloudTrail
+<a name="#cloudtrail"></a>
+## AWS CloudTrail
 
 AWS hesapları için audit mekanizmasıdır ve default olarak enable'dır. AWS hesabında yapılan, API call geçmişine ulaşmamızı sağlar ve bu bilgilere; Console, SDK, CLI ve AWS servisleri aracılığı ile ulaşabiliriz.
 
@@ -2905,7 +3098,8 @@ Bu loglar S3 içerisinde tutulduklarında, SSE-S3 encrption ile muhafaza edilirl
 
 ![image75](images/image75.png)
 
-#### VPC Endpoints
+<a name="#endpoints"></a>
+## VPC Endpoints
 
 ![image76](images/image76.png)
 
@@ -2931,7 +3125,8 @@ Interface endpoint, entry point olarak bir ENI yani private IP adresi sağlar. B
 
 Bu yapı aynı zamanda private link olarak da bilinmektedir.
 
-#### AWS Instance Types
+<a name="#instance-types"></a>
+# AWS Instance Types
 
 **Genel Kullanım:** T2, T3, M4, M5
 
