@@ -4,7 +4,7 @@
 
 ## Table of Contents
 
-- **Preparation guide for AWS Big Data / Data Analytics – Specialty**
+- **Preparation guide for AWS Big Data / Data Analytics – Specialty Exam**
   - <a href="https://github.com/oktaytuncay/Knowledge_Base/blob/master/aws_big_data_specialty/aws_big_data_specialty_tr.md" target="_blank">**`Turkish`**</a>
   - <a href="https://github.com/oktaytuncay/Knowledge_Base/blob/master/aws_big_data_specialty/aws_big_data_specialty_en.md" target="_blank">**`English - still in progress`**</a>
 
