@@ -1,12 +1,12 @@
 # Knowledge Base
 
-![image00](images/image00.png)
+![image00](aws_big_data_specialty/images/image00.png)
 
 ## Table of Contents
 
 - **Preparation guide for AWS Big Data / Data Analytics – Specialty**
-  - <a href="https://github.com/oktaytuncay/Knowledge_Base/aws_big_data_specialty/aws_big_data_specialty_tr.md" target="_blank">**`Turkish`**</a>
-  - <a href="https://github.com/oktaytuncay/Knowledge_Base/aws_big_data_specialty/aws_big_data_specialty_en.md" target="_blank">**`English - still in progress`**</a>
+  - <a href="https://github.com/oktaytuncay/Knowledge_Base/blob/master/aws_big_data_specialty/aws_big_data_specialty_tr.md" target="_blank">**`Turkish`**</a>
+  - <a href="https://github.com/oktaytuncay/Knowledge_Base/blob/master/aws_big_data_specialty/aws_big_data_specialty_en.md" target="_blank">**`English - still in progress`**</a>
 
 ---
 
