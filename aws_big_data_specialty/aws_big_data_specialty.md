@@ -1,13 +1,12 @@
 AWS Big Data / Data Analytics – Specialty
 =========================================
 
-#### Purpose
+Purpose
 -------------
-#### Preparation guide for AWS Certified Big Data / Data Analytic Speciality
+Preparation guide for AWS Certified Big Data / Data Analytic Speciality
 
 - [AWS Big Data / Data Analytics – Specialty](#aws-big-data--data-analytics-%e2%80%93-specialty)
-  - [#### Purpose](#purpose)
-      - [Preparation guide for AWS Certified Big Data / Data Analytic Speciality](#preparation-guide-for-aws-certified-big-data--data-analytic-speciality)
+  - [Purpose](#purpose)
 - [Collection](#collection)
   - [Kinesis](#kinesis)
     - [Kinesis Streams](#kinesis-streams)
