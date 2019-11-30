@@ -425,6 +425,10 @@ Aynı anda sadece 1 tane resharding işi yapılabilir ve bu işin süresi shard 
 * Client side encryption manual olarak implemente edilmelidir.
 * VPC Endpoint, Kinesis'in VPC'ye erişmesi için kullanılabilir.
 
+#### Kinesis Video Streams
+
+Video streaming yapmak ve store etmek için kullanılabilir. Videolar API'ler ile  daha sonra tekrar izlenebilir. Kinesis Video Streams kullanılıyorsa, verileri HLS (HTTP Live Streaming) dönüştürmeye gerek yoktur.
+
 ### Kinesis Data Firehose
 
 Administration maaliyeti olmayan AWS tarafından fully managed bir servistir.
@@ -734,6 +738,7 @@ Tb veya Pb düzeyindeki verilerin, AWS içinde veya dışında taşımaya yardı
 * Data transfer işi başına ücretlendirilir.
 * Büyük Cloud migration, DC taşınması ve disaster recovery durumlarında tercih edilebilir.
 * **Bir veri taşıma network üzerinden 1 hafta veya daha uzun sürecek ise, snowball kullanmak hem daha hızlı hem de daha güvenli olacaktır.**
+* 900 tb büyüklüğünde bir verinin 100Mbps hat ile gönderilmesi yıllar alabilir. Bu gibi snowball cost effective bir çözüm olacaktır.
 
 ### Snowball Process
 
@@ -971,6 +976,8 @@ Prefix key olarak tarih kullanılması kesinlikle tavsiye edilmez. Tarih birden 
 
 CloudFront kullanarak, S3 objelerin cache alınması ve farklı regionlardan yapılacak okuma taleplerinin hızlanması sağlanabilir.
 
+CloudFront Gigabit-Scale (https) global request dağıtım hizmetidir ve 10Gbps veya 15000 rps'de daha yüksek pig değerleri ile çalışabilir. Tahmin edilemeyen, scale olabilen ve coğrafi olarak dağılmış veriler üzerinde tavsiye edilir. 
+
 Edge location kullanarak, S3 transfer acceleration yapılabilir. 
 Kodda değişiklik yapılmasına gerek olmadan, sadece endpoint değişikliği ile bu iyileştirme yapılabilir.
 
@@ -1086,7 +1093,7 @@ Vault bir archive collection'dır. Her vault bir tane vault access policy ve bir
 
 ### S3 CORS (Cross-Origin Resource Sharing)
 
-Client web application'ın başka bir domain'den resource request etmesidir.
+Bir domanine yüklenen client web uygulamasının, farklı bir domainde bulunan kaynaklara erişmesini sağlar. 
 
 Eğer başka bir websitesinden data talep edilecek ise, CORS enable edilmelidir.
 Cross Origin Resource Sharing, dosya paylaşımın sınırlanmasını sağlar ve böylece maaliyetin düşürülmesine de faydası olur.
@@ -1341,7 +1348,7 @@ Gelen sonuca pagination yani sayfalandırma yapma yeteneği vardır.
 * Her tablo için en fazla 5 tane oluşturulabilir.
 * Sort key tam olarak 1 tane scalar attribute'dan oluşur.
 * Seçilen attribute scalar string, number veya binary olmalıdır.
-* LSI, tablonun oluşturulma zamanı tanımlanmalıdır, sonradan eklenemez..
+* **LSI, tablonun oluşturulma zamanı tanımlanmalıdır, sonradan eklenemez ve ana tablo ile aynı partition key sahip olmalıdır.**
 * Tanımlanan LSI'de (Local Secondary Index) WCU tüketilmesine neden olabilir.
     * Tabloya bir item eklenirse, update olursa veya silinirse; LSI güncellenir ve bu işlem sırasında da, WCU tüketilir
 
@@ -1594,6 +1601,7 @@ Geçici ve uzun süreli cluster'lar kullanılabilir.
 
 * Geçici kapasite için spot instance mantıklı bir tercih olabilir.
 * Uzun süreli çalışacak cluster'lar için, reserved instance kullanılabilir.
+* Süreli reserved instance'lar, spot instance'lare göre daha güvenilir ve düşük maaliyetlidir. 
 
 İşlerin çalıştırmak için, master node'a bağlanılmalıdır.
 Sıralı adımlar console'dan gönderilebilir.
@@ -1819,6 +1827,8 @@ IAM policy, Kerberos, SSH ve IAM rolleri security kısmında kullanılmaktadır.
 EMR cluster terminate edilirse, EMR'a ait olan volume'larda silinecektir.
 
 Amazon; EMR cluster'larında, **Master ve Core node olarak reserved veya on-demand instance** tavsiye etmektedir. Performansı arttırmek ve maaliyeti düşürmek için **Task node olarak da Spot instance** tavsiye etmektedir.
+
+**Not:** Amazon; EMR cluster'larında, Master ve Core node olarak reserved veya on-demand instance tavsiye etmektedir. Performansı arttırmek ve maaliyeti düşürmek için Task node olarak da Spot instance kullanılabilir.
 
 ## Machine Learning
 
@@ -2132,6 +2142,12 @@ Bu mimariye Lambda'da dahil olabilir.
 Süreç içerisinde herhangi bir hata olursa, bu hatalar da bütün uygulamalar için Error Stream'e gönderilecektir.
 
 Eğer uygulama belli bir datayı process ederken veri tipi uyuşmaması gibi bir hata alırsa, bu hata Error Stream'e yazılacaktır.
+
+**Kinesis Analytics Query Tipleri**
+
+**Continuous Query:** Monitor işleri ve alarm oluşturma ihtiyaçlarında kullanılabilir.
+**Stagger Query:** Data geldiğinde, zamana dayalı olarak verileri toplar.
+**Tumbling Query:** Schedule olarak verileri toplayan sorgu biçimidir.
 
 **Kullanım Alanları:** Streaming extract veya ETL süreçleri; örnek olarak Kinesis Data Stream'den sürekli IoT sensörlerini okuyan bir uygulama olsun ve bu uygulama sensör tipine göre datayı organize etsin, ardından çift kayıtları temizlesin, bu kayıtları belli bir schema yapısına göre düzenlesin ve S3'de muhafaza edilecek şekilde datayı gönderecek olsun.
 
@@ -2450,6 +2466,10 @@ Copy komutu ile aynı anda birden fazla data dosyası veya birden fazla data str
 S3'den, EMR'dan, DynamoDB'den veya ssh kullanarak remote bir host'dan data import edilebilir.
 Bu gibi işlemlerde güvenlik gerekçesi ile S3, manifest file ve IAM role talep edecektir.
 
+**Copy komutu, S3 üzerinde bulunan verinin Redshift cluster'ına gönderilmesi için kullanılabilir. Copy komutu S3 bucket'dan paralel okuma yapmak ve yüklemek için, Redshift MPP mimarisini kullanır.**
+
+**Verileri birden fazla dosyaya bölerek ve tabloda bulunan distribution key ayarlanarak, maksimum performans alınamasını sağlar.**
+
 **Copy komutu Noload parametresi ile de gönderilebilir.** Bu durumda veri bütünlüğünü yüklemeden önce kontrol edilebilir ve olası dosya kopyalama sorunlarının önüne geçilmesini sağlar.
 
 **Unload:**
@@ -2697,6 +2717,10 @@ MariaDB, Microsoft SQL Server, MySQL version 5.5 veya sonrası, Oracle, PostgreS
 
 ### QuickSight Visual Types
 
+Redshift ve S3 JSON belgeleriyle görselleştirme sağlayabilir ve aynı zamanda Excel dosyalarını da kullanabilir. Excel dosyaları için Lambda gibi herhangi bir fonksiyona ihtiyacı yoktur.
+
+Cost-effective çözüm olarak transient yani geçici EMR cluster, data aggreagte etmek ve visualization kısmı için de QuickSight ile kullanılabilir.
+
 ![image59](images/image59.png)
 
 İkinci dünya savaşında kaybedilen insanların grafik ile oranları görünmektedir.
@@ -2929,7 +2953,8 @@ DynamoDB, at rest encrypted da olabilir.
 * EC2 instance'a attach edilen IAM rollleri ile uygun S3 erişimleri, EMRFS requestleri ve Hive ile DynamoDB scan işlemleri sağlanmaktadır.
 * EC2 security grupları kullanılmaktadır ve bu tanım yapılırken, 1 tanım master node için ve bir başka tanımda core veya task node olan cluster node'u içindir.
 * Encryption at rest için, EBS encrption, HDFS encrption veya S3 için de LUKS + EMRFS kullanılanilmektedir.
-* **LUKS sadece EMR içidir. Redshift'de kullanılmaz.**
+* **LUKS sadece EMR içidir. Redshift'de kullanılmaz.** Sadece attach olmuş storage volume'da encrypt eder, root volume encrypt edilmez. EMR cluster'ında HDFS şifrelemesine ek olarak, EC2 instance volume'larınıda encrypt eder ve attach olmuş EBS volume'lar LUKS kullanarak şifrelenir.
+
 
 EMR un-encrypted verilere izin vermemektedir. Map Reduce, Spark, EMRFS veya herhangi bir SSL endpoint işleri için, SSL kullanarak, In-transit encrption sağlanabilir.
 
