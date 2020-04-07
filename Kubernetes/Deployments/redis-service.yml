@@ -8,7 +8,6 @@ metadata:
 spec:
   ports:
   - port: 6379
-    name: redis-something
     targetPort: 6379
   selector:
     name: redis-pod
