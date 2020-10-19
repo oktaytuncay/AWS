@@ -219,13 +219,13 @@ Kinesis Data Stream 3 ayrı management servis barındırmaktadır.
 
 Near real-time çalışan bir servistir.
 
-![image1](images/image1.png)
+![image1](./images/image1.png)
 
 ### Kinesis Streams
 
 Consumer veriyi shard’lardan okur.
 
-![image2](images/image2.png)
+![image2](./images/image2.png)
 
 Veriyi by default 24 saat tutar ve bu süre en fazla 7 gün olabilir. Süre artışına paralel olarak maaliyet de artacaktır. Veriyi yeniden process etme yeteneği vardır. Veri bir kere işlendikten sonra silinemez. Aynı veri tekrar tekrar okunabilir. Data, retention periyoduna bağlı olarak silinecektir ve bu nedenle birden fazla uygulama aynı anda veriyi consume edebilir. Data bir kere Kinesis’e insert edildiği zaman, silinemez. **Immutability**, append only stream.
 
@@ -298,7 +298,7 @@ KPL kayıtları, KCL ile ve özel yardımcı library'ler ile de-coded edilmelidi
 
 ##### Kinesis Producer Library (KPL) Batching
 
-![image3](images/image3.png)
+![image3](./images/image3.png)
 
 KPL ile aggregation ve collection yapabiliriz.
 Şekilde görünen 7 kayıt sadece 2 kayıt şeklinde gönderilebilir.
@@ -313,11 +313,11 @@ Java-based bir agent'dır ve sadece linux-based server'larda kurulabilir.
 
 ### Kinesis Consumers
 
-![image4](images/image4.png)
+![image4](./images/image4.png)
 
 Kinesis Data Stream'den veri okumak için SDK veya CLI kullanabiliriz. KPL ile üretebiliriz ve KCL ile okuyabiliriz. Apache Spark consumer olarak Kinesis Data Stream'den okuma yapabilir. Kayıtlar consumerlar tarafından bir shard'dan toplanır. Her shard toplamda 2mb throughput'a sahiptir.
 
-![image5](images/image5.png)
+![image5](./images/image5.png)
 
 GetRecord en fazla 10mb veya 10000 kayıt data döndürebilir. Her shard 2mb throughput'a sahip olduğundan ve yukarıdaki senaryoda 3 consumer’da aynı shard’dan okuma yaptığından dolayı, bu gibi bir senaryo 5 saniye sürecektir.
 
@@ -337,13 +337,13 @@ Java-based bir library'dir ama Golang, Python, Ruby, Node, .NET ile de kullanıl
 
 KPL aggregation yapar. KCL de-aggregation yapar.
 
-![image6](images/image6.png)
+![image6](./images/image6.png)
 
 Tek bir grup içinde birden fazla consumer ile birden fazla shard paylaşabilir.
 
 Checkpoint özelliği ile işlemin devam ettirilmesini sağlar. Bu sayede uygulamalardan birinde sorun olsa bile tekrar devam edebilir. KCL uygulamanın durumunu takip etmek için Amazon Kinesis Data Streams uygulamalarının **hepsi için ayrı DynamoDB tablosu kullanır.** DynamoDB ile etkileşimli, Kinesis Consuler Library (KCL) ile beraber kullanılabilecek checkpointing özelliği vardır. Bu sayede consumption ilerleyişi izlenebilir.
 
-![image7](images/image7.png)
+![image7](./images/image7.png)
 
 Stream edilen datanın hem process hem de raw hali saklanacağı zaman, veriyi yakalamak için Kinesis Stream ve analiz amaçlı işlemek için Spark Streaming kullanılabilir. Lambda fonksiyonu yardımı ile de, raw data S3 tarafında bulunan backed Firehose mesajları push edilebilir.
 
@@ -393,7 +393,7 @@ Stream kapasitesinin arttırılması için kullanılır. (Her Shard için 1 mb/s
 
 **Çalışma şekli:** Eski shard kapanır ve eski shard data expire olana kadar kalır ve data expire olunca gider.
 
-![image8](images/image8.png)
+![image8](./images/image8.png)
 
 Sekild görünen Shard 2 Hot Shard olsun ve bunu Shard 4 ve Shard 5 olmak üzere 2'ye split edelim. Bu durumda Shard 2'de bulunan data expire olana kadar kalır ve data expire olunca Shard 4 ve Shard 5 olarak devam eder. Bu şekilde throughput artışı da sağlamış oluruz.
 
@@ -402,7 +402,7 @@ Split operasyonunda olduğu gibi burada da, eski shardlar içerisindeki data exp
 
 Kinesis Auto Scaling Manual müdahale ile yapılmaktadır. UpdateShardCount API işlemi ile yapılır. Auto scaling işini AWS Lambda ile gerçekleştirebiliriz.
 
-![image9](images/image9.png)
+![image9](./images/image9.png)
 
 Re-sharding işi paralel olarak yapılamaz. Öncesinde kapasite planlaması yapılması gerekmektedir.
 Aynı anda sadece 1 tane resharding işi yapılabilir ve bu işin süresi shard sayısına göre değişir. 
@@ -444,11 +444,11 @@ Sadece Firehose üzerinden giden veri için ücretlendirme yapılmaktadır.
 
 Spark Streaming veya Kinesis Client Library, Kinesis Firehose'dan veri okuyamaz sadece Kinesis Data Stream'den veri okuyabilirler.
 
-![image10](images/image10.png)
+![image10](./images/image10.png)
 
 Diagram'da Kinesis Data Firehose'un yeri daha net görülmektedir. Data source olarak KPL, Kinesis Agent, Kinesis Data Stream (en sık kullanılandır), CloudWatch, IoT verileri gibi veri kaynakları olabilirken, data transformation için Lambda kullanılabilir. Lambda'nın buradaki görevi, datayı alarak transform etmesi ve sonrasında tekrar datayı Firehose'a göndermesidir. Transform olmuş data yukarıda bahsetildiği gibi sadece S3, Redshift, ElasticSearch veya Splunk'a gönderilir.
 
-![image11](images/image11.png)
+![image11](./images/image11.png)
 
 S3 aynı zamanda herhangi bir transformation veya delivery failure durumunda da kullanılabilir.
 
@@ -494,12 +494,12 @@ En eski AWS servislerinden biridir ve AWS tarafından fully managedır.
 * Best-effort ordering de, bozuk mesajlar olabilir.
 * Gönderilen mesajlarda mesaj başına 256kb sınır bulunmaktadır.
 
-![image12](images/image12.png)
+![image12](./images/image12.png)
 
 Consumerlar aynı anda 10 mesaja kadar alabilirler.
 Bu mesajlar visibility timeout parametresi içerisinde process edilir. Mesajlar process edildikten sonra, message_id kullanılarak, bu mesajlar que'dan silinir.
 
-![image13](images/image13.png)
+![image13](./images/image13.png)
 
 SQS olduğu zaman, consumerlar poll messages işini yapacak, consumerlar bu mesajları process edeceklerdir ve bir daha process edilmemesi için ardından SQS que'dan sileceklerdir.
 
@@ -513,13 +513,13 @@ Queue adımının sonu .fifo ile bitmelidir.
 Daha düşük throughput sunmaktadır ve batching ile saniye 3000 ve batch olmayan işlemler için saniyede 300 throughput sağlamaktadır.
 Mesajlar sırayla işlenir ve sadece 1 kere gönderilir. Duplication ID kullanılarak 5 dakikalık aralıklarla veri tekilleştirme sağlanılabilir.
 
-![image14](images/image14.png)
+![image14](./images/image14.png)
 
 Mesajlar 1,2,3,4,5 sırası ile gönderilmiş ise, consumerlar tarafından yine aynı sırada okunacaklardır.
 
 SQS ile 256 kb üzerinde mesaj gönderilmesi tavsiye edilmez ama ihtiyaç ısrarla bu yönde ise, bir java library'si olan SQS extended Client ile sağlanır.
 
-![image15](images/image15.png)
+![image15](./images/image15.png)
 
 Bunun için Amazon S3 kullanılır ve diyelimki 5 mb veya 10 mb mesaj göndermek isteyelim. Yukarıdaki gibi büyük mesajlar producer tarafından direk S3'e gönderilir ve bu mesajlar yine direk S3'den direk alınır.
 
@@ -585,7 +585,7 @@ Shard kapasitesi, limite dayanmadan önce sağlanmalıdır.  | Dinamik olarak sc
 
 Kinesis Data Stream, Data Firehose, SQS standart ve Fifo arasındaki fark aiağıdaki tabloda daha açık görünmektedir.
 
-![image24](images/image24.png)
+![image24](./images/image24.png)
 
 **Use cases:**
 
@@ -610,11 +610,11 @@ SQS:
 
 ## IoT (Internet of Things)
 
-![image16](images/image16.png)
+![image16](./images/image16.png)
 
 IoT, internet of things yani nesnelerin interneti anlamına gelir. Burada yer alan nesne her şey olabilir. Bisiklet, araba, lamba yani kısasacı istenilen her şeydir.
 
-![image17](images/image17.png)
+![image17](./images/image17.png)
 
 Burada yer alan nesne konfigüre edilir ve data bu nesnelerden alınır.
 
@@ -637,7 +637,7 @@ T anı için termostatın internete bağlantısında bize bağlı olmayan bir so
 Bu durumda bizim gönderdiğimiz API, Device shadow'a gidecek ve device shadow artık odanın sıcaklığının 20 derece olması gerektiğini bilecek.
 Asıl device'da yaşanan bağlantı sorunu ortadan kalktığı anda da, shadow device asıl device'a talebi iletecektir ve sıcaklığın düşürülmesi için süreç başlayacaktır.
 
-![image18](images/image18.png)
+![image18](./images/image18.png)
 
 Bir ampul için olabilecek basit mimarinin görseli de yukarıdaki gibi olacaktır.
 
@@ -654,7 +654,7 @@ MQTT, WebSocket ve http 1.1 protokollerini destekler. AWS tarafından fully mana
 Örnek olarak nesne connected bisikletlerden olsun. Bisiklet, AWS ortamında yer alan Device Gateway'e MQTT mesajları göndererek, veri akışının güvenli şekilde yapılmasını sağlar.
 
 **Rules Engine**
-![image19](images/image19.png)
+![image19](./images/image19.png)
 
 Kurallar MQTT topiclerinde tanımlanmaktadır.
 **Rules:** Tetiklenecek iş
@@ -707,7 +707,7 @@ Database schema engine'i birinden bir diğerine convert olur.
 
 ## Direct Connect
 
-![image20](images/image20.png)
+![image20](./images/image20.png)
 
 On-Premise network ve VPC arasında dedike kurulu private bir bağlantıdır. Birden fazla 1 gb/s veya 10 gb/s bağlantı kurulabilir. Bu şekilde bir bağlantı için VPC'de virtual private network kurulmalıdır. 
 
@@ -724,7 +724,7 @@ IPv4 ve IPv6 desteği vardır.
 
 Yukarıdaki diagramda görüldüğü gibi AWS Direct Connect endpoint ile hem Amazon Glacier veya S3 gibi public kaynaklara hem de private network'de olan EC2 instance'larına güvenli ve hızlı bağlantı kurulabilir.
 
-![image21](images/image21.png)
+![image21](./images/image21.png)
 
 Eğer direct connect bağlantısı aynı account'da bulunan farklı region'larda bulunan VPC'ler için isteniyorsa, Direct Connect Gateway kullanılmalıdır.
 
@@ -742,7 +742,7 @@ Tb veya Pb düzeyindeki verilerin, AWS içinde veya dışında taşımaya yardı
 
 ### Snowball Process
 
-![image22](images/image22.png)
+![image22](./images/image22.png)
 
 * AWS console'dan snowball device talebi girilir.
 * Snowball client server'lara yüklenir.
@@ -762,7 +762,7 @@ Cihaza compute yeteneği ekler ve aynı zamanda storage (24 vcpu) ve compute (52
 
 ### AWS Snowmobile
 
-![image23](images/image23.png)
+![image23](./images/image23.png)
 
 Exabytes yani 100 pb veri transferi sağlar.
 
@@ -774,7 +774,7 @@ Her Snowmobile 100 pb kapasiteye sahiptir ve paralel kullanım sağlamaktadır. 
 
 Dosyaların yani objelerin bucketlara yani dizinlere konumlasını sağlar.
 
-![image25](images/image25.png)
+![image25](./images/image25.png)
 
 Bucketlar global olarak unique bir isme sahip olmaları gerekmektedir.
 Bucketlar region seviyesinde tanımlanmaktadır ve isim standartları aşağıdaki gibi olmalıdır.
@@ -886,7 +886,7 @@ S3'de, birden fazla storage katmanı vardır.
     * Standart, 3-5 saat arasında veriye ulaşılabilir ve Gb başına 0.01 dolar ve 1000 request başına 0.05 dolar olacak şekilde ücretlendirilir.
     * Bulk, 5-12 saat arasında veriye ulaşılabilir ve Gb başına 0.0025$ ve request başına 0.025 dolar olacak şekilde ücretlendirilir.
 
-![image26](images/image26.png)
+![image26](./images/image26.png)
 
 ### S3 Lifecycle Rules
 
@@ -996,14 +996,14 @@ S3'de bulunan objeler için 4 farklı encryption bulunmaktadır.
 
 **SSE-S3:**
 
-![image27](images/image27.png)
+![image27](./images/image27.png)
 
 AES-256 bit encryption. Header ile kullanmak mecburidir.
 “x-amz-server-side-encryption": "AES256"
 
 **SSE-KMS:**
 
-![image28](images/image28.png)
+![image28](./images/image28.png)
 
 Avantajları: Kullanıcı konrolü ve audit trail header ile kullanmak mecburidir.
 x-amz-server-side-encryption": ”aws:kms"
@@ -1015,7 +1015,7 @@ Bu servis ücretlidir.
 
 **SSE-C:**
 
-![image29](images/image29.png)
+![image29](./images/image29.png)
 
 Client tarafından sağlanan key ile server side encryption
 Amazon S3 encryption key'i muhafaza etmez. Key müşteri tarafından yönetilir, key kaybedilirse, veriye erişim imkansız olur.
@@ -1024,7 +1024,7 @@ Amazon S3 encryption key'i muhafaza etmez. Key müşteri tarafından yönetilir,
 
 #### Client Side Encryption
 
-![image30](images/image30.png)
+![image30](./images/image30.png)
 
 Data S3'e gönderilmeden önce müşteri tarafından şifrelenmelidir ve S3'den alınırken, veriler müşteri tarafından decrypt edilmelidir.
 Encryption key ve bu cycle tamamen müşteri tarafından yönetilir.
@@ -1061,7 +1061,7 @@ JSON based policies
 
 #### S3 Default Encryption vs Bucket Policies
 
-![image31](images/image31.png)
+![image31](./images/image31.png)
 
 Default encryption aktif hale getirmenin eski yolu bucket policy idi ve belirli bir header'a sahip olmayan bütün http komutlarının reddedilmesini temel alırdı.
 
@@ -1126,7 +1126,7 @@ DynamoDB tablolardan yapılır. Bütün tablolar kendi primary key'lerine sahipt
 
 **Opsiyon 1:** Partition key only (Hash)
 
-![image32](images/image32.png)
+![image32](./images/image32.png)
 
 * Partition key her item için unique olmalıdır.
 * Partition key datanın distribute olması için farklı olmalıdır.
@@ -1135,7 +1135,7 @@ DynamoDB tablolardan yapılır. Bütün tablolar kendi primary key'lerine sahipt
 
 **Opsiyon 2:** Partition key + Sort key
 
-![image33](images/image33.png)
+![image33](./images/image33.png)
 
 Opsiyon unique olmalıdır.
 Data partition key'e göre gruplandırılır.
@@ -1207,7 +1207,7 @@ Bir write capacity, saniyede 1 kb boyutunca bir öğe için yazmayı temsil eder
 
 #### Strongly Consistent Read vs Eventually Consistent Read
 
-![image34](images/image34.png)
+![image34](./images/image34.png)
 
 Yukarıdaki diagramda yer alan application okumayı DynamoDB Server 1'den de yapabilir, 3'den de yapabilir. Data 1'e yazılmış olsun ve henüz replikasyon tamamlanmamış olsun.
 
@@ -1243,7 +1243,7 @@ Partition key mümkün olduğu kadar distribute edilmelidir. Eğer RCU sorunu is
 
 DynamoDB'de tablo oluşturulduğu zaman her tablo 1 tane partition ile başlar ve partitionların belli sınırları vardır. Partitionlar en fazla 3000 RCU ve 1000 WCU barındırabilir ve en fazla 10 gb büyüklüğüne ulaşabilir.
 
-![image35](images/image35.png)
+![image35](./images/image35.png)
 
 Yukarıda görünen örnek tabloda 3 tane partition var ve elimizde user_id adında bir tane item bulunsun.
 Bu user_id=1 partition 1'e gitmiş olsun ve ardı sıra gelenlerde aşağıdaki gibi dağılmış olsun.
@@ -1342,7 +1342,7 @@ Gelen sonuca pagination yani sayfalandırma yapma yeteneği vardır.
 
 #### LSI (Local Secondary Index)
 
-![image36](images/image36.png)
+![image36](./images/image36.png)
 
 * Tablolar için alternatif range key'dir. Local'den hash key'e
 * Her tablo için en fazla 5 tane oluşturulabilir.
@@ -1354,7 +1354,7 @@ Gelen sonuca pagination yani sayfalandırma yapma yeteneği vardır.
 
 #### GSI (Global Secondary Index)
 
-![image37](images/image37.png)
+![image37](./images/image37.png)
 
 * Non-key attribute barındıran sorguların hızlandırılması için kullanılır.
 * GSI = partition key + opsiyonel sort key
@@ -1379,7 +1379,7 @@ LSI aksine, GSI (Global Secondary Index) birincil tablo kapasitesini etkilememek
 
 ### DynamoDB DAX
 
-![image38](images/image38.png)
+![image38](./images/image38.png)
 
 DAX, DynamoDB Accelerator kısaltmasıdır.
 
@@ -1396,7 +1396,7 @@ Tablolardan yapılacak olan yüksek sayıda okumanın önüne geçeceğinden, Ho
 
 ### DynamoDB Streams
 
-![image39](images/image39.png)
+![image39](./images/image39.png)
 
 DynamoDB'de yapılan create, update ve delete gibi işlemler DynamoDB Stream'de sona erebilir.
 
@@ -1411,7 +1411,7 @@ Bu stream AWS Lambda tarafından okunabilir ve sonrasında;
 
 #### DynamoDB Streams Kinesis Adapter
 
-![image40](images/image40.png)
+![image40](./images/image40.png)
 
 DynamoDB Stream'den doğrudan yararlanmak için KCL library kullanılmalıdır ve bunun için sadece library'e "Kinesis Adapter" eklenmelidir.
 
@@ -1488,7 +1488,7 @@ Lambda genel olarak real-time data processing, real-time stream processing, ETL,
 
 Node.js, Python, Java, C#, Go, Poweshell, Ruby desketlenen dillerdir.
 
-![image41](images/image41.png)
+![image41](./images/image41.png)
 
 Yukarıda yer alan servisler Lambda trigger'lardır.
 
@@ -1548,7 +1548,7 @@ S3'de bulunan datanın sorgulanmasını sağlamaktadır. Bir cihazın her saat s
 Eğer öncelik olarak time range bir sorgulama yapılacak ise, data yyyy/mm/dd/device şeklinde bucketlarda tutulmalıdır.
 Eger öncelik olarak device bazlı bir sorgulama yapılacak ise, data device/yyyy/mm/dd şeklinde bucketlarda tutulmalıdır.
 
-![image42](images/image42.png)
+![image42](./images/image42.png)
 
 Glue aynı zamanda Hive ile entegre çalışabilmektedir. Glue data catalog'u, hive için metadata store olarak veya hive metastore, glue'ya import edilebilir.
 
@@ -1587,7 +1587,7 @@ EMR AWS servisleri ile çeşitli entegrasyon noktaları vardır ve EMR, hadoop c
 
 ### EMR Cluster
 
-![image43](images/image43.png)
+![image43](./images/image43.png)
 
 **Master node,** cluster'ı yönetmek ile sorumludur ve single çalışan EC2 instance'dır.
 
@@ -1650,7 +1650,7 @@ EMR saatlik olarak ücretlendirilir ve bu ücretin üzerinde kullanılan EC2 ins
 
 #### External Hive Metastore
 
-![image44](images/image44.png)
+![image44](./images/image44.png)
 
 By default, master node'da bulunan MySQL veri tabanında bulunur.
 
@@ -1732,7 +1732,7 @@ Spark, Python, JDBC, HBase, Elasticsearch ve daha fazlası ile entegre çalışa
 
 ##### Zeppelin + Spark
 
-![image45](images/image45.png)
+![image45](./images/image45.png)
 
 Spark shell'de olduğu gibi, interaktif olarak spark kodlarının yazılmasını sağlar ve bu da development sürecini hızlandırır.
 
@@ -1740,7 +1740,7 @@ SparkSQL ile SQL tipinde sorguları çalıştırabilir ve bu sorgu sonuçları t
 
 ##### EMR Notebooks
 
-![image46](images/image46.png)
+![image46](./images/image46.png)
 
 Zeppelin ile benzer bir uygulamadır ama daha fazla AWS entegrasyonu sunar.
 
@@ -1764,7 +1764,7 @@ HDFS veya EMRFS ve S3 arasında veri taramasına ve taşımasına olanacak sağl
 
 #### Splunk
 
-![image47](images/image47.png)
+![image47](./images/image47.png)
 
 Genel bir tanım ile, sunucu verilerine erişebilir, kullanabilir ve bu verilerin herkes tarafından kullanılmasını sağlar.
 
@@ -1863,7 +1863,7 @@ Peki bu Supervised Learning modelininin ne kadar iyi olduğunu nasıl test edebi
 
 Bunun yollarından birisi Train/Set adında bir şey kullanmaktır.
 
-![image48](images/image48.png)
+![image48](./images/image48.png)
 
 Train verileri geçmiş verilerden alınır ve bu rastgele iki sete ayrılır. Bu setlerden birisine training set denir ve bu genellikle datanın bulk halidir.
 
@@ -1909,7 +1909,7 @@ Sadece belli bir kaç model desteği vardır ve onlar da aşağıdaki gibidir.
 
 ##### Confusion Matrix
 
-![image49](images/image49.png)
+![image49](./images/image49.png)
 
 Multiclass classification doğruluğunu görselleştirmenin bir yoludur.
 
@@ -2057,7 +2057,7 @@ Bireysel bir nöron, yeterli düzeyde nöron tarafından aktive edildiğinde ba�
 
 Bu nöronların birbirlerine bağlanması bir çok farklı yolla olabilirken, her bir bağlantının da kendine ait bağlantı kümesi olduğundan, ağın tamamı son derece karmaşık bir hal alıyor. Ve bu karmaşık bağlantı, evrenin kendi içerisindeki bağlantıya çok benzer bir görüntü ortaya koyuyor.
 
-![image50](images/image50.png)
+![image50](./images/image50.png)
 
 Kim bilir belki de karmaşık bağlantıları grafiklere döken matematiksel bir dal olan cebirsel topoloji ve AI ile ilerleyen yıllarda, beyin-uzay ağı arasındaki bu benzerliği yorumlayabilir ve çok daha farklı konular konuşuruz.
 
@@ -2092,7 +2092,7 @@ Deep learning için tavsiye edilen instace tipleri,
 
 ## AWS Data Pipeline
 
-![image51](images/image51.png)
+![image51](./images/image51.png)
 
 Temel olarak taskları schedule etmek ve bigdata mimarisini process etmeye yarar.
 
@@ -2123,7 +2123,7 @@ Aynı Spark Streming'de olduğu gibi verileri toplayabileceğimiz ve analiz edeb
 
 **Streaming data üzerinde kompleks SQL kullanarak analiz yapılmaktan bahsediliyorsa, Kinesis bunun için en uygun çözümdür.**
 
-![image52](images/image52.png)
+![image52](./images/image52.png)
 
 Kinesis Analytics 3 ana bölümü vardır.
 
@@ -2186,7 +2186,7 @@ Elastic Stack, Beats adında daha büyük bir paketin parçası olan ve temel ol
 
 ### Kibana
 
-![image53](images/image53.png)
+![image53](./images/image53.png)
 
 Yukarıda Kibana dashboard örneği görünmektedir.
 
@@ -2210,7 +2210,7 @@ Bu servis ile, Docker log dosyalarını izliyorlar ve bunun üzerinde güvenlik 
 
 **Çalışma Prensibi:**
 
-![image54](images/image54.png)
+![image54](./images/image54.png)
 
 Bir belge kolesiyonu olan bir index, shard'lara bölünür.
 
@@ -2247,7 +2247,7 @@ Cluster'ın VPC içerisinde olup olmayacağı başta karar verilmeldir. Sonradan
 
 Cognito öncelik olarak Kibana ile konuşma bağlamında faydalıdır.
 
-![image55](images/image55.png)
+![image55](./images/image55.png)
 
 Kibana'ya web interface'den erişilebilir ve böylece cluster içerisine girip http bağlantısı açılabilir.
 
@@ -2357,7 +2357,7 @@ Cost effective'dir. Sadece harcanan kaynaklar için ücret ödenmektedir. Hesapl
 
 Analitik workload'ları hızlandırma, DWH modernizasyonu, veri analizinde bulunmak, historical verilerin saklanması, clickstream gibi verilerin tutulmazı ve analiz edilmesi, sosyal medya verilerinin analizi Redshift'in kullanılabileceği alanlardır.
 
-![image56](images/image56.png)
+![image56](./images/image56.png)
 
 Bir cluster, Amazon Redshift'in temel altyapı bileşenidir.
 
@@ -2541,7 +2541,7 @@ https://docs.aws.amazon.com/redshift/latest/mgmt/managing-snapshots-console.html
 
 ## Amazon RDS (Relational Database Service)
 
-![image57](images/image57.png)
+![image57](./images/image57.png)
 
 * Client information, address, kredi karti bilgileri, client bilgileri gibi bilgileri barindir.
 * DB instance’a yani OS’a erişim yoktur ama engine’e erişim vardır.
@@ -2685,7 +2685,7 @@ Belirli bir connection bağlantısını encrypt etmek için de, Client için RDS
 
 **Synchronous replikasyon isteniyorsa, Multi-AZ kullanılmalıdır. Ancak bu AZ’lar kesinlikle aynı region’da olmalıdır.**
 
-![image58](images/image58.png)
+![image58](./images/image58.png)
 
 ### RDS Scaling
 
@@ -2721,22 +2721,22 @@ Redshift ve S3 JSON belgeleriyle görselleştirme sağlayabilir ve aynı zamanda
 
 Cost-effective çözüm olarak transient yani geçici EMR cluster, data aggreagte etmek ve visualization kısmı için de QuickSight ile kullanılabilir.
 
-![image59](images/image59.png)
+![image59](./images/image59.png)
 
 İkinci dünya savaşında kaybedilen insanların grafik ile oranları görünmektedir.
 Kırmızı bar milyon olarak ve mavi bar nüfusa oranı temsil etmektedir.
 
 Bar Charts, histogramları karşılaştırma ve distribution için kullanılır.
 
-![image60](images/image60.png)
+![image60](./images/image60.png)
 
 Line graphs, zaman içinde olan değişimler için kullanılır
 
-![image61](images/image61.png)
+![image61](./images/image61.png)
 
 Scatter Plots;  korelasyon ve dağılım grafikleri için kullanılmaktadır.
 
-![image62](images/image62.png)
+![image62](./images/image62.png)
 
 Heat maps; 3 boyutlu veriye örnektir. Yanda bulunan heat map, hangi genin hangi şartlar altında olduğunu gösterir ve belirli bir gen ifadesini genel üzerinde yorumlamayı sağlar.
 
@@ -2773,13 +2773,13 @@ Kredi kartı gibi hassas olan bir veri, ödeme yapmak için web üzerinden gönd
 SSL sertifikaları bu gibi bir durumda ihtiyacı karşılayabilmektedir. Bunun bir diğer yolu da https kullanmaktır.
 Encryption in flight, MITM (man in the middle attack) diye tabir edilen, verinin ulaşma sürecinceki saldırıyı engellemek için kullanılmaktadır.
 
-![image63](images/image63.png)
+![image63](./images/image63.png)
 
 Yukarıdaki örnek, bir AWS servisine https ile bağlandığımızda olan encyption sürecini anlatmaktadır.
 
 **Server side encyption at rest:**
 
-![image64](images/image64.png)
+![image64](./images/image64.png)
 
 Data, server'a geldikten sonra encrypt edilir ve client'a gönderilmeden önce tekrar decrypted edilir.
 
@@ -2789,7 +2789,7 @@ AWS platformunda KMS Key Management adında servis tarafından kontrol edilir ve
 
 **Client side encyption:**
 
-![image65](images/image65.png)
+![image65](./images/image65.png)
 
 Data client tarafından encrypt edilir ve hiç bir zaman server tarafından decrypted edilemez, sadece client tarafında decrypted edilir.
 
@@ -2822,7 +2822,7 @@ CloudTrail ile key usage denetlenebilir ve bu her 10000 call için 0.03$ olarak 
 * Kullanıcı tarafından AWS ortamında oluşturulmuş KMS, aylık 1$ olarak ücretlendirilir.
 * Kullanıcı tarafından import edilen key: yıllık 1$ olarak ücretlendirilir ancak burada tek bir koşul vardır. O da import edilecek key'in, 256 bit symmetric key olması gerektiğidir.
 
-![image66](images/image66.png)
+![image66](./images/image66.png)
 
 Client veya SDK olduğunu düşünelim, 4kb'dan daha düşük bir şifremiz olsun ve encrypt API kullanacağız.
 
@@ -2841,7 +2841,7 @@ AWS servislerinden S3 hariç, hepsinde encrypt olmayan bir storage'da encyption 
 
 ## Cloud HSM (Hardware Security Module)
 
-![image67](images/image67.png)
+![image67](./images/image67.png)
 
 KMS kullanmanın bir alternatifi olarak, HSM kullanmaktır.
 
@@ -2856,7 +2856,7 @@ KMS’in aksine hem symmetric hem de asymmetric encryption desteklemektedir. Yan
 Bu servisin ücretsiz sürümü yoktur ve HSM isteniyorsa, CloudHSM Client Software kullanılmalıdır.
 
 Kurumsal HSM var ise ve AWS Redshift kullanılıyorsa, Redshift Cluster’ı, VPN bağlantısı ile kurumsal HSM ile de uygun maaliyet ile entegre olabilir.  
-![image68](images/image68.png)
+![image68](./images/image68.png)
 
 ## Security AWS Services
 
@@ -2870,7 +2870,7 @@ Kurumsal HSM var ise ve AWS Redshift kullanılıyorsa, Redshift Cluster’ı, VP
 * VPC encpoints desteklemektedir ve bunun anlamı private EC2 instance'larından, Kinesis servislerine private olarak bağlanılmasını sağlar. Kinesis'den okuma yapmak için, KCL kullanılabilir ancak bu durumda DynamoDB tablosuna okuma ve yazma yetkisi de verilmesi gerekmektedir. Çünkü KCL, farklı KCL instance'ları arasında check pointing ve paylaşımı kontrol etmek için DynamoDB tablosunu kullanmaktadır.
 * Amazon Kinesis Streams kayıtlarının encryption/decryption akışı aşağıdaki gibidir. **Kayıtların encrypt edilmesi isteniyorsa, client side encryption kullanılması gerekmektedir çünkü encryption işleminin, Kinesis Stream’e gönderilmeden önce producer üzerinde yapılması gerekmektedir.**
 
-![image69](images/image69.png)
+![image69](./images/image69.png)
 
 #### Kinesis Data Firehose
 
@@ -3019,7 +3019,7 @@ Cognito gibi third party provider'lar ile federation'da sağlanabilir. Genelde W
 
 ## STS ve Cross Account Access
 
-![image70](images/image70.png)
+![image70](./images/image70.png)
 
 * Cross account access işin aşağıdaki adımların takip edilmesi gerekmektedir.
 * Başka bir hesabın erişmesi için bir IAM role tanımlanmalı.
@@ -3037,7 +3037,7 @@ Müşteriler ile Netflix arasında trust ilişki olması gerekmektedir. Bu var i
 
 Identity Federation, AWS dışında bulunan kullanıcıların, AWS kaynaklarına erişimi için geçici bir role almalarını sağlar. 
 
-![image71](images/image71.png)
+![image71](./images/image71.png)
 
 Yukarıda görüldüğü gibi kullanıcı Cognito gibi AWS ile arasında trust ilişki olan 3rd party yazılım vardır. Kullanıcı bu 3rd party uygulamaya login olur ve karşışığında bir credential alır.
 
@@ -3052,7 +3052,7 @@ Bu providerlar AWS ile trust bir ilişki içerisindedirler ve bu sayede kayıtl�
 
 #### CLI based access
 
-![image72](images/image72.png)
+![image72](./images/image72.png)
 
 Organizasyon içerisinde bulunan bir client uygulaması olduğunu varsayalım.
 
@@ -3065,7 +3065,7 @@ Organizasyon içerisinde bulunan bir client uygulaması olduğunu varsayalım.
 
 #### Console based access
 
-![image73](images/image73.png)
+![image73](./images/image73.png)
 
 Mantık CLI based ile hemen hemen aynıdır. 
 Kimlik doğrulaması yapılacak, Idp SAML assertion getirecek, SAML assertion ile arka planda STS ile konuşan, AWS SSO endpoint'a oturum açılabilir.
@@ -3080,7 +3080,7 @@ SAML ile aynı prensipte çalışır ancak SAML göre çok daha fazla manual iş
 
 #### AWS Cognito - Public Application için Federated Identity Pools
 
-![image74](images/image74.png)
+![image74](./images/image74.png)
 
 Client tarafından, AWS kaynaklarına direk olarak erişim yapması için kullanılmaktadır.
 
@@ -3151,11 +3151,11 @@ CloudTrail isteğe bağlı olarak, region spesifik veya global olabilir.
 
 Bu loglar S3 içerisinde tutulduklarında, SSE-S3 encrption ile muhafaza edilirler.
 
-![image75](images/image75.png)
+![image75](./images/image75.png)
 
 ## VPC Endpoints
 
-![image76](images/image76.png)
+![image76](./images/image76.png)
 
 VPC endpoint, AWS servislerine public networkden ziyade private network ile bağlanılmasına olanak sağlar.
 
@@ -3171,7 +3171,7 @@ IGW veya NAT Gateway gibi gereksinimleri ortadan kaldırır.
 
 İki türlü endpoint bulunmaktadır.
 
-![image77](images/image77.png)
+![image77](./images/image77.png)
 
 Gateway endpoint, sadece S3 ve DynamoDB için kullanılır ve bir hedef belirlenerek konfigüre edilir.
 
