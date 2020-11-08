@@ -1,6 +1,6 @@
 # Knowledge Base
 
-![image00](./aws_big_data_specialty/images/image00.PNG)
+![image00](./aws_big_data_specialty/images/image00.png)
 
 ## Table of Contents
 
