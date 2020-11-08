@@ -1,1 +1,1 @@
-![work-in-progress](./images/work-in-progress.png)
+![work-i-progress](./images/work-in-progress.png)
