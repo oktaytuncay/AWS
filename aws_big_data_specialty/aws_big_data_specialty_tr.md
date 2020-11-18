@@ -395,7 +395,7 @@ Stream kapasitesinin arttırılması için kullanılır. (Her Shard için 1 mb/s
 
 ![image8](./images/image8.png)
 
-Sekild görünen Shard 2 Hot Shard olsun ve bunu Shard 4 ve Shard 5 olmak üzere 2'ye split edelim. Bu durumda Shard 2'de bulunan data expire olana kadar kalır ve data expire olunca Shard 4 ve Shard 5 olarak devam eder. Bu şekilde throughput artışı da sağlamış oluruz.
+Sekilde görünen Shard 2 Hot Shard olsun ve bunu Shard 4 ve Shard 5 olmak üzere 2'ye split edelim. Bu durumda Shard 2'de bulunan data expire olana kadar kalır ve data expire olunca Shard 4 ve Shard 5 olarak devam eder. Bu şekilde throughput artışı da sağlamış oluruz.
 
 Bu işlemin tersi de yapılabilir yani 2 shard'ı tek bir shard ile merge edebiliriz ve bu şekilde maaliyet kazancı sağlamış oluruz.
 Split operasyonunda olduğu gibi burada da, eski shardlar içerisindeki data expire olunca kapanacaktır.
@@ -738,7 +738,7 @@ Tb veya Pb düzeyindeki verilerin, AWS içinde veya dışında taşımaya yardı
 * Data transfer işi başına ücretlendirilir.
 * Büyük Cloud migration, DC taşınması ve disaster recovery durumlarında tercih edilebilir.
 * **Bir veri taşıma network üzerinden 1 hafta veya daha uzun sürecek ise, snowball kullanmak hem daha hızlı hem de daha güvenli olacaktır.**
-* 900 tb büyüklüğünde bir verinin 100Mbps hat ile gönderilmesi yıllar alabilir. Bu gibi snowball cost effective bir çözüm olacaktır.
+* 900 tb büyüklüğünde bir verinin 100Mbps hat ile gönderilmesi yıllar alabilir. Bu gibi bir ihtiyaç için snowball cost effective bir çözüm olacaktır.
 
 ### Snowball Process
 
@@ -863,7 +863,7 @@ S3'de, birden fazla storage katmanı vardır.
 
 **Use Cases,** İkinci backup kopyasını saklanmasına veya yeniden üretilebilecek önemsiz veriler için kullanılabilir.
 
-#### S3 Intelligent Tiering (new!)
+#### S3 Intelligent Tiering
 
 * S3 standart gibi düşük latency ve yüksek throughput sağlar.
 * Düşük bir monitoring ve auto-tiering ücretlendirmesi vardır.
@@ -1827,8 +1827,6 @@ IAM policy, Kerberos, SSH ve IAM rolleri security kısmında kullanılmaktadır.
 EMR cluster terminate edilirse, EMR'a ait olan volume'larda silinecektir.
 
 Amazon; EMR cluster'larında, **Master ve Core node olarak reserved veya on-demand instance** tavsiye etmektedir. Performansı arttırmek ve maaliyeti düşürmek için **Task node olarak da Spot instance** tavsiye etmektedir.
-
-**Not:** Amazon; EMR cluster'larında, Master ve Core node olarak reserved veya on-demand instance tavsiye etmektedir. Performansı arttırmek ve maaliyeti düşürmek için Task node olarak da Spot instance kullanılabilir.
 
 ## Machine Learning
 
@@ -2855,7 +2853,8 @@ Availability için cluster'lar multi AZ olarak çalışmaktadır.
 KMS’in aksine hem symmetric hem de asymmetric encryption desteklemektedir. Yani hem SSL hem de TLS key desteklemektedir.
 Bu servisin ücretsiz sürümü yoktur ve HSM isteniyorsa, CloudHSM Client Software kullanılmalıdır.
 
-Kurumsal HSM var ise ve AWS Redshift kullanılıyorsa, Redshift Cluster’ı, VPN bağlantısı ile kurumsal HSM ile de uygun maaliyet ile entegre olabilir.  
+Kurumsal HSM var ise ve AWS Redshift kullanılıyorsa, Redshift Cluster’ı, VPN bağlantısı ile kurumsal HSM ile de uygun maaliyet ile entegre olabilir.
+
 ![image68](./images/image68.png)
 
 ## Security AWS Services
@@ -2954,7 +2953,6 @@ DynamoDB, at rest encrypted da olabilir.
 * EC2 security grupları kullanılmaktadır ve bu tanım yapılırken, 1 tanım master node için ve bir başka tanımda core veya task node olan cluster node'u içindir.
 * Encryption at rest için, EBS encrption, HDFS encrption veya S3 için de LUKS + EMRFS kullanılanilmektedir.
 * **LUKS sadece EMR içidir. Redshift'de kullanılmaz.** Sadece attach olmuş storage volume'da encrypt eder, root volume encrypt edilmez. EMR cluster'ında HDFS şifrelemesine ek olarak, EC2 instance volume'larınıda encrypt eder ve attach olmuş EBS volume'lar LUKS kullanarak şifrelenir.
-
 
 EMR un-encrypted verilere izin vermemektedir. Map Reduce, Spark, EMRFS veya herhangi bir SSL endpoint işleri için, SSL kullanarak, In-transit encrption sağlanabilir.
 
