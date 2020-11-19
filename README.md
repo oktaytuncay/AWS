@@ -1,6 +1,6 @@
 # Knowledge Base
 
-![image00](https://raw.githubusercontent.com/oktaytuncay/Knowledge_Base/master/aws_big_data_specialty/images/image00.png?raw=true){:class="img-responsive"}
+![image00](https://raw.githubusercontent.com/oktaytuncay/Knowledge_Base/master/aws_big_data_specialty/images/image00.png?raw=true){:height="50%" width="50%"}
 
 ## Table of Contents
 
