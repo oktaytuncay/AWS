@@ -1,6 +1,6 @@
 # Knowledge Base
 
-  ![image00]("./images/image00.png")
+  ![image00]("./images/image00.png" width="800" /)
 
 ## Table of Contents
 
