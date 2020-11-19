@@ -1,6 +1,6 @@
 # Knowledge Base
 
-![image00](./images/image00.png)
+![image00](https://raw.githubusercontent.com/oktaytuncay/Knowledge_Base/blob/master/aws_big_data_specialty/images/image00.png?raw=true)
 
 ## Table of Contents
 
