@@ -1,6 +1,6 @@
 # Knowledge Base
 
-![image00](./images/image00.png){:class="img-responsive"}
+![image00](/images/image00.png){:class="img-responsive"}
 
 ## Table of Contents
 
