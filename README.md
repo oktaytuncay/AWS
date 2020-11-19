@@ -1,6 +1,6 @@
 # Knowledge Base
 
-![image00](./images/image00.png){:height="700px" width="400px"}
+![image00](./images/image00.png){:class="img-responsive"}
 
 ## Table of Contents
 
