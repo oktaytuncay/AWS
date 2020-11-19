@@ -1,6 +1,6 @@
 # Knowledge Base
 
-![image00](https://raw.githubusercontent.com/oktaytuncay/Knowledge_Base/master/aws_big_data_specialty/images/image00.png?raw=true){:height="700px" width="400px"}
+![image00](./images/image00.png){:height="700px" width="400px"}
 
 ## Table of Contents
 
